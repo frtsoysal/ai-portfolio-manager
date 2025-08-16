@@ -31,6 +31,7 @@ export interface Holding {
   sector?: string;
   industry?: string;
   beta?: number;
+  data_source?: string;
 }
 
 export interface PortfolioSummary {
