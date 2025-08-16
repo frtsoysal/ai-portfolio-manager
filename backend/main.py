@@ -18,7 +18,11 @@ app = FastAPI(
 # CORS (Cross-Origin Resource Sharing) ayarları
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Frontend URL'leri
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:3001",
+        "https://ai-portfolio-manager-ashen.vercel.app"
+    ],  # Frontend URL'leri
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

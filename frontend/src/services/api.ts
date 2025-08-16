@@ -2,7 +2,7 @@
  * API Service - Backend ile iletişim kuran servis
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ai-portfolio-manager-krrs.onrender.com';
 
 export interface Portfolio {
   id: string;
