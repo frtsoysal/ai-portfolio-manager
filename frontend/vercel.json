@@ -3,11 +3,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "functions": {
-    "app/**/*.tsx": {
-      "runtime": "@vercel/node"
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
-  }
+  ]
 }
 
 
