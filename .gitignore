@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Next.js
+.next/
+out/
+
+# Logs
+*.log
+backend.log
+backend_server.log
+
+# Environment
+.env
+.env.local
+.env.production
+.env.production.local
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+
+
+
+
+
