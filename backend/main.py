@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from services.portfolio_service import portfolio_service
 from services.market_data_service import market_data_service
+from services.sp500_data_service import sp500_service
 import logging
 
 # Logging ayarları
@@ -156,6 +157,110 @@ async def get_legacy_portfolio():
         }
     except Exception as e:
         logger.error(f"Error fetching legacy portfolio: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+# S&P 500 Data endpoints
+@app.get("/api/sp500/companies")
+async def get_sp500_companies():
+    """S&P 500 şirketlerinin listesini döner"""
+    try:
+        companies = sp500_service.get_sp500_list()
+        return {
+            "companies": companies,
+            "total_count": len(companies),
+            "last_updated": "2024-01-01T00:00:00Z"
+        }
+    except Exception as e:
+        logger.error(f"Error fetching S&P 500 companies: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/api/sp500/{symbol}/fundamentals")
+async def get_stock_fundamentals(symbol: str):
+    """Belirli bir hisse senedinin fundamental verilerini döner"""
+    try:
+        fundamentals = sp500_service.get_stock_fundamentals(symbol.upper())
+        if not fundamentals:
+            raise HTTPException(status_code=404, detail="Fundamental data not found")
+        return fundamentals
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching fundamentals for {symbol}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/api/sp500/{symbol}/historical")
+async def get_stock_historical(symbol: str, days: int = 252):
+    """Hisse senedinin tarihsel verilerini ve teknik analiz göstergelerini döner"""
+    try:
+        # Validate days parameter
+        if days <= 0 or days > 2000:
+            raise HTTPException(status_code=400, detail="Days must be between 1 and 2000")
+        
+        historical_data = sp500_service.get_historical_data(symbol.upper(), days)
+        if historical_data is None or historical_data.empty:
+            raise HTTPException(status_code=404, detail="Historical data not found")
+        
+        # Add technical indicators
+        data_with_indicators = sp500_service.calculate_technical_indicators(historical_data)
+        
+        # Convert to dict for JSON response
+        result = {
+            "symbol": symbol.upper(),
+            "period_days": days,
+            "data_points": len(data_with_indicators),
+            "data": data_with_indicators.fillna(0).to_dict('records'),
+            "last_updated": data_with_indicators.index[-1].isoformat() if not data_with_indicators.empty else None
+        }
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching historical data for {symbol}: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/api/sp500/{symbol}/analysis")
+async def get_stock_analysis(symbol: str):
+    """Hisse senedinin kapsamlı analizini döner (fundamental + technical)"""
+    try:
+        # Get both fundamental and technical data
+        fundamentals = sp500_service.get_stock_fundamentals(symbol.upper())
+        historical_data = sp500_service.get_historical_data(symbol.upper(), 252)
+        
+        if not fundamentals and (historical_data is None or historical_data.empty):
+            raise HTTPException(status_code=404, detail="Analysis data not found")
+        
+        analysis = {
+            "symbol": symbol.upper(),
+            "fundamentals": fundamentals,
+            "technical_summary": None
+        }
+        
+        # Add technical analysis summary if historical data exists
+        if historical_data is not None and not historical_data.empty:
+            data_with_indicators = sp500_service.calculate_technical_indicators(historical_data)
+            latest = data_with_indicators.iloc[-1]
+            
+            analysis["technical_summary"] = {
+                "current_price": latest.get("close", 0),
+                "sma_20": latest.get("sma_20", 0),
+                "sma_50": latest.get("sma_50", 0),
+                "sma_200": latest.get("sma_200", 0),
+                "rsi": latest.get("rsi", 0),
+                "macd": latest.get("macd", 0),
+                "volatility_20": latest.get("volatility_20", 0),
+                "volume_ratio": latest.get("volume_ratio", 0),
+                "trend_signal": "bullish" if latest.get("close", 0) > latest.get("sma_50", 0) else "bearish",
+                "momentum_signal": "strong" if latest.get("rsi", 50) > 70 else "weak" if latest.get("rsi", 50) < 30 else "neutral"
+            }
+        
+        return analysis
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching analysis for {symbol}: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 # Uygulama çalıştırma
