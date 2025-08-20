@@ -59,10 +59,11 @@ interface DCFData {
 export async function getScreenerData(): Promise<ScreenerRow[]> {
   const apiKey = process.env.FMP_API_KEY
   if (!apiKey) {
-    throw new Error('FMP_API_KEY is required')
+    throw new Error('FMP_API_KEY environment variable is required. Please set it in your Vercel project settings.')
   }
 
   try {
+    console.log('[FMP] Fetching S&P 500 constituent list...')
     // Get S&P 500 list
     const sp500Response = await fetch(
       `https://financialmodelingprep.com/api/v3/sp500_constituent?apikey=${apiKey}`
@@ -107,9 +108,10 @@ export async function getScreenerData(): Promise<ScreenerRow[]> {
       }
     })
 
+    console.log(`[FMP] Successfully fetched ${screenerData.length} companies`)
     return screenerData.filter(row => row.price > 0)
   } catch (error) {
-    console.error('Error fetching screener data:', error)
+    console.error('[FMP] Error fetching screener data:', error)
     return []
   }
 }
@@ -120,10 +122,11 @@ export async function getScreenerData(): Promise<ScreenerRow[]> {
 export async function getDCFData(symbol: string): Promise<DCFData | null> {
   const apiKey = process.env.FMP_API_KEY
   if (!apiKey) {
-    throw new Error('FMP_API_KEY is required')
+    throw new Error('FMP_API_KEY environment variable is required. Please set it in your Vercel project settings.')
   }
 
   try {
+    console.log(`[FMP] Fetching DCF data for ${symbol}...`)
     const [
       profileResponse,
       financialsResponse,
@@ -199,8 +202,11 @@ export async function getDCFData(symbol: string): Promise<DCFData | null> {
         price: p.close
       })).reverse() || []
     }
+    
+    console.log(`[FMP] Successfully fetched DCF data for ${symbol}`)
+    return dcfData
   } catch (error) {
-    console.error(`Error fetching DCF data for ${symbol}:`, error)
+    console.error(`[FMP] Error fetching DCF data for ${symbol}:`, error)
     return null
   }
 }
