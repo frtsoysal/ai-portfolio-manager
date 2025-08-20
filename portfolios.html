@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portföyler - AI Portfolio Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .strategies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .strategy-card {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .strategy-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
+        }
+        
+        .strategy-card.selected {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--color);
+        }
+        
+        .strategy-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .strategy-name {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .strategy-desc {
+            color: #cbd5e1;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+        
+        .selected-badge {
+            background-color: var(--color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        .strategy-card.selected .selected-badge {
+            display: block;
+        }
+        
+        .actions {
+            text-align: center;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎯 AI Portföy Stratejileri</h1>
+            <p class="subtitle">
+                Yapay zeka destekli 5 farklı yatırım stratejisi arasından seçim yapın
+            </p>
+        </div>
+
+        <div class="strategies">
+            <div class="strategy-card" data-strategy="growth" style="--color: #3b82f6">
+                <div class="strategy-icon">📈</div>
+                <div class="strategy-name" style="color: #3b82f6">Growth Portfolio</div>
+                <div class="strategy-desc">Yüksek büyüme potansiyeli olan şirketler</div>
+                <div class="selected-badge">✨ Seçildi</div>
+            </div>
+
+            <div class="strategy-card" data-strategy="value" style="--color: #10b981">
+                <div class="strategy-icon">💎</div>
+                <div class="strategy-name" style="color: #10b981">Value Portfolio</div>
+                <div class="strategy-desc">Değeri düşük, potansiyeli yüksek şirketler</div>
+                <div class="selected-badge">✨ Seçildi</div>
+            </div>
+
+            <div class="strategy-card" data-strategy="momentum" style="--color: #f59e0b">
+                <div class="strategy-icon">🚀</div>
+                <div class="strategy-name" style="color: #f59e0b">Momentum Portfolio</div>
+                <div class="strategy-desc">Güçlü momentum gösteren şirketler</div>
+                <div class="selected-badge">✨ Seçildi</div>
+            </div>
+
+            <div class="strategy-card" data-strategy="dividend" style="--color: #8b5cf6">
+                <div class="strategy-icon">💰</div>
+                <div class="strategy-name" style="color: #8b5cf6">Dividend Portfolio</div>
+                <div class="strategy-desc">Yüksek temettü veren şirketler</div>
+                <div class="selected-badge">✨ Seçildi</div>
+            </div>
+
+            <div class="strategy-card" data-strategy="turkish" style="--color: #ef4444">
+                <div class="strategy-icon">🇹🇷</div>
+                <div class="strategy-name" style="color: #ef4444">Turkish Stars</div>
+                <div class="strategy-desc">Türk şirketleri odaklı portföy</div>
+                <div class="selected-badge">✨ Seçildi</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary">🚀 Portföyü Başlat</button>
+            <a href="index.html" class="btn btn-secondary">← Ana Sayfa</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedStrategy = 'growth';
+
+        document.querySelectorAll('.strategy-card').forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove selected from all cards
+                document.querySelectorAll('.strategy-card').forEach(c => 
+                    c.classList.remove('selected'));
+                
+                // Add selected to clicked card
+                card.classList.add('selected');
+                selectedStrategy = card.dataset.strategy;
+            });
+        });
+
+        // Set initial selection
+        document.querySelector(`[data-strategy="${selectedStrategy}"]`).classList.add('selected');
+    </script>
+</body>
+</html>

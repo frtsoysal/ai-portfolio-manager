@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S&P 500 Dashboard - AI Portfolio Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-card.blue {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .stat-card.green {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .stat-card.yellow {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #cbd5e1;
+        }
+        
+        .companies-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+        }
+        
+        .companies-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .companies-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .companies-table th {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .companies-table td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .companies-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .company-symbol {
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        
+        .company-name {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+        
+        .market-cap {
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 4rem;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ef4444;
+            padding: 2rem;
+        }
+        
+        .btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .back-section {
+            text-align: center;
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">📈 S&P 500 Dashboard</h1>
+            <p class="subtitle">Real-time S&P 500 şirket verileri ve analizi</p>
+        </div>
+
+        <div id="loading" class="loading">
+            ⏳ Veriler yükleniyor...
+        </div>
+
+        <div id="content" style="display: none;">
+            <div class="stats">
+                <div class="stat-card blue">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-value" style="color: #3b82f6" id="total-companies">0</div>
+                    <div class="stat-label">Toplam Şirket</div>
+                </div>
+
+                <div class="stat-card green">
+                    <div class="stat-icon">🏭</div>
+                    <div class="stat-value" style="color: #10b981">11</div>
+                    <div class="stat-label">Sektör</div>
+                </div>
+
+                <div class="stat-card yellow">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value" style="color: #f59e0b" id="total-market-cap">$0</div>
+                    <div class="stat-label">Toplam Piyasa Değeri</div>
+                </div>
+            </div>
+
+            <div class="companies-section">
+                <div class="companies-header">
+                    <h2 style="font-size: 1.5rem; margin: 0;">🔝 Top 20 Şirket</h2>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="companies-table">
+                        <thead>
+                            <tr>
+                                <th>Şirket</th>
+                                <th>Sektör</th>
+                                <th style="text-align: right;">Fiyat</th>
+                                <th style="text-align: right;">Piyasa Değeri</th>
+                                <th style="text-align: right;">P/E</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companies-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            ❌ Veriler yüklenirken hata oluştu. Backend API'si çalışır durumda olduğundan emin olun.
+        </div>
+
+        <div class="back-section">
+            <a href="index.html" class="btn">← Ana Sayfa</a>
+        </div>
+    </div>
+
+    <script>
+        function formatMarketCap(value) {
+            if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`;
+            if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`;
+            if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+            return `$${value.toLocaleString()}`;
+        }
+
+        async function loadSP500Data() {
+            try {
+                const response = await fetch('http://localhost:8001/api/sp500/overview');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update stats
+                document.getElementById('total-companies').textContent = data.total_companies || 0;
+                
+                const totalMarketCap = data.companies?.reduce((sum, c) => sum + (c.market_cap || 0), 0) || 0;
+                document.getElementById('total-market-cap').textContent = formatMarketCap(totalMarketCap);
+                
+                // Update companies table
+                const tbody = document.getElementById('companies-tbody');
+                const companies = data.companies?.slice(0, 20) || [];
+                
+                tbody.innerHTML = companies.map((company, index) => `
+                    <tr>
+                        <td>
+                            <div>
+                                <div class="company-symbol">${company.symbol || 'N/A'}</div>
+                                <div class="company-name">${company.company_name || 'N/A'}</div>
+                            </div>
+                        </td>
+                        <td style="color: #cbd5e1;">${company.sector || 'N/A'}</td>
+                        <td style="text-align: right; font-weight: bold;">
+                            ${company.current_price ? '$' + company.current_price.toFixed(2) : 'N/A'}
+                        </td>
+                        <td style="text-align: right;" class="market-cap">
+                            ${formatMarketCap(company.market_cap || 0)}
+                        </td>
+                        <td style="text-align: right;">
+                            ${company.pe_ratio ? company.pe_ratio.toFixed(1) : 'N/A'}
+                        </td>
+                    </tr>
+                `).join('');
+                
+                // Show content, hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+            } catch (error) {
+                console.error('API Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+            }
+        }
+
+        // Load data on page load
+        loadSP500Data();
+    </script>
+</body>
+</html>

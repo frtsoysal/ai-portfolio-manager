@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: ["class"],
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -17,6 +18,13 @@ module.exports = {
         '"Segoe UI Symbol"',
         '"Noto Color Emoji"'
       ]
+    },
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
     },
     extend: {
       fontFamily: {
@@ -42,6 +50,39 @@ module.exports = {
         ]
       },
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
         neutral: {
           50: "#f7f7f7",
           100: "#eeeeee",
@@ -54,34 +95,28 @@ module.exports = {
           800: "#545454",
           900: "#464646",
           950: "#282828"
-        },
-        primary: {
-          50: "#f3f1ff",
-          100: "#e9e5ff",
-          200: "#d5cfff",
-          300: "#b7a9ff",
-          400: "#9478ff",
-          500: "#7341ff",
-          600: "#631bff",
-          700: "#611bf8",
-          800: "#4607d0",
-          900: "#3c08aa",
-          950: "#220174",
-          DEFAULT: "#611bf8"
         }
       },
       borderRadius: {
-        none: "0px",
-        sm: "6px",
-        DEFAULT: "12px",
-        md: "18px",
-        lg: "24px",
-        xl: "36px",
-        "2xl": "48px",
-        "3xl": "72px",
-        full: "9999px"
-      }
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+      },
     }
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate")],
 }

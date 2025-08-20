@@ -30,6 +30,15 @@ export default function Home() {
             <Link href="/portfolios" className="text-gray-300 hover:text-white transition-colors">
               Portfolios
             </Link>
+            <Link href="/sp500" className="text-gray-300 hover:text-white transition-colors">
+              S&P 500
+            </Link>
+            <Link href="/screener" className="text-gray-300 hover:text-white transition-colors">
+              Screener
+            </Link>
+            <Link href="/dcf/AAPL" className="text-gray-300 hover:text-white transition-colors">
+              DCF Analysis
+            </Link>
             <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
               Features
             </Link>
@@ -66,11 +75,23 @@ export default function Home() {
                 Start AI Investing
               </Link>
               <Link 
-                href="#features"
-                className="border border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+                href="/sp500"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
               >
-                Learn More
+                📈 S&P 500 Dashboard
               </Link>
+                              <Link
+                  href="/dcf/AAPL"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+                >
+                  🧮 DCF Analysis
+                </Link>
+                <Link
+                  href="#features"
+                  className="border border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  Learn More
+                </Link>
             </div>
 
             {/* Portfolio Stats */}

@@ -267,3 +267,115 @@ async def get_stock_analysis(symbol: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)
+
+# S&P 500 Dashboard Endpoints
+from services.sp500_dashboard_service import get_dashboard_service
+
+@app.get("/api/sp500/overview")
+async def get_sp500_overview():
+    """Get overview of all S&P 500 companies"""
+    dashboard = get_dashboard_service()
+    return dashboard.get_companies_overview()
+
+@app.get("/api/sp500/company/{symbol}")
+async def get_company_details(symbol: str):
+    """Get detailed company information"""
+    dashboard = get_dashboard_service()
+    return dashboard.get_company_details(symbol.upper())
+
+@app.get("/api/sp500/sectors")
+async def get_sector_analysis():
+    """Get sector-wise analysis"""
+    dashboard = get_dashboard_service()
+    return dashboard.get_sector_analysis()
+
+@app.get("/api/sp500/top/{metric}")
+async def get_top_performers(metric: str, limit: int = 20):
+    """Get top performers by metric (market_cap, roe, low_pe, high_margin)"""
+    dashboard = get_dashboard_service()
+    return dashboard.get_top_performers(metric, limit)
+
+@app.get("/api/sp500/search")
+async def search_companies(q: str):
+    """Search companies by symbol or name"""
+    dashboard = get_dashboard_service()
+    return dashboard.search_companies(q)
+
+@app.get("/api/sp500/summary")
+async def get_sp500_summary():
+    """Get S&P 500 summary statistics only (fast endpoint)"""
+    dashboard = get_dashboard_service()
+    overview = dashboard.get_companies_overview()
+    
+    if 'error' in overview:
+        return overview
+    
+    # Return only summary statistics
+    companies = overview['companies']
+    
+    summary = {
+        'total_companies': len(companies),
+        'collection_date': overview['collection_date'],
+        'stats': {
+            'mega_caps': len([c for c in companies if c['market_cap'] >= 1e12]),
+            'large_caps': len([c for c in companies if 1e11 <= c['market_cap'] < 1e12]),
+            'total_market_cap': sum(c['market_cap'] for c in companies),
+            'avg_pe': sum(c['pe_ratio'] for c in companies if c['pe_ratio'] and 0 < c['pe_ratio'] < 100) / 
+                     len([c for c in companies if c['pe_ratio'] and 0 < c['pe_ratio'] < 100]),
+            'top_5_companies': [
+                {
+                    'symbol': c['symbol'],
+                    'company_name': c['company_name'],
+                    'market_cap': c['market_cap'],
+                    'sector': c['sector']
+                }
+                for c in companies[:5]
+            ]
+        }
+    }
+    
+    return summary
+
+@app.get("/api/sp500/companies")
+async def get_sp500_companies_paginated(
+    page: int = 1, 
+    limit: int = 50, 
+    sector: str = None, 
+    search: str = None
+):
+    """Get paginated S&P 500 companies"""
+    dashboard = get_dashboard_service()
+    overview = dashboard.get_companies_overview()
+    
+    if 'error' in overview:
+        return overview
+    
+    companies = overview['companies']
+    
+    # Apply filters
+    if sector and sector != 'All':
+        companies = [c for c in companies if c['sector'] == sector]
+    
+    if search:
+        companies = [c for c in companies 
+                    if search.lower() in c['symbol'].lower() or 
+                       search.lower() in c['company_name'].lower()]
+    
+    # Pagination
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_companies = companies[start:end]
+    
+    return {
+        'companies': paginated_companies,
+        'pagination': {
+            'page': page,
+            'limit': limit,
+            'total': len(companies),
+            'pages': (len(companies) + limit - 1) // limit
+        },
+        'filters': {
+            'sector': sector,
+            'search': search
+        }
+    }

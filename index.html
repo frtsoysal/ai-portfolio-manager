@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Portfolio Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+        }
+        
+        .title {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 3rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 3rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-api {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .status-detail {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+        
+        .api-test {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-family: monospace;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🚀 AI Portfolio Manager</h1>
+        
+        <p class="subtitle">
+            AI destekli portföy yönetim uygulaması başarıyla çalışıyor!<br />
+            Backend ve Frontend servisleri aktif.
+        </p>
+        
+        <div class="buttons">
+            <a href="portfolios.html" class="btn btn-primary">
+                📊 Portföyleri Gör
+            </a>
+            
+            <a href="sp500.html" class="btn btn-secondary">
+                📈 S&P 500 Dashboard
+            </a>
+            
+            <a href="http://localhost:8001/docs" class="btn btn-api" target="_blank">
+                🔗 API Docs
+            </a>
+        </div>
+        
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon">✅</div>
+                <div class="status-title">Backend API</div>
+                <div class="status-detail">Port 8001 - Aktif</div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">✅</div>
+                <div class="status-title">Frontend</div>
+                <div class="status-detail">Port 3000 - Aktif</div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">🗂️</div>
+                <div class="status-title">S&P 500 Data</div>
+                <div class="status-detail">503 Companies</div>
+            </div>
+            
+            <div class="status-card">
+                <div class="status-icon">🤖</div>
+                <div class="status-title">AI Engine</div>
+                <div class="status-detail">Ready</div>
+            </div>
+        </div>
+        
+        <div class="api-test">
+            <strong>🔗 API Test:</strong><br />
+            <span id="api-status">Backend bağlantısı test ediliyor...</span>
+        </div>
+    </div>
+
+    <script>
+        // Test backend connection
+        async function testAPI() {
+            try {
+                const response = await fetch('http://localhost:8001/health');
+                const data = await response.json();
+                document.getElementById('api-status').innerHTML = 
+                    `✅ Backend API: ${data.message || 'Başarılı'}`;
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = 
+                    `❌ Backend API: Bağlantı kurulamadı`;
+            }
+        }
+        
+        // Test API on page load
+        testAPI();
+    </script>
+</body>
+</html>

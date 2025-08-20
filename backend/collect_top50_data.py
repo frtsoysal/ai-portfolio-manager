@@ -169,3 +169,4 @@ if __name__ == "__main__":
     print("• Growth Strategy (yüksek ROE, revenue growth)")
     print("• Technical Strategy (RSI, MACD sinyalleri)")
     print("• Quality Strategy (düşük debt, yüksek margin)")
+

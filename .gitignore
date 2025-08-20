@@ -34,6 +34,21 @@ backend_server.log
 dist/
 build/
 
+# TypeScript
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Railway
+.railway
+
+# Data files (keep local only)
+*.json
+!package*.json
+!tsconfig*.json
+!components.json
+
 
 
 

@@ -2,7 +2,10 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd backend && source venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port $PORT"
+startCommand = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
+
+[variables]
+PYTHONPATH = "/app/backend"
 
 
 
