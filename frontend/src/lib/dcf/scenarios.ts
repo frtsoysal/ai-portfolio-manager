@@ -262,7 +262,7 @@ export const runMonteCarloSimulation = (
         randomValue = min + Math.random() * (max - min)
       }
 
-      scenarioInputs[param.name] = randomValue
+      ;(scenarioInputs as any)[param.name] = randomValue
     })
 
     try {
