@@ -204,7 +204,53 @@ export async function getDCFData(symbol: string): Promise<DCFData | null> {
     }
     
     console.log(`[FMP] Successfully fetched DCF data for ${symbol}`)
-    return dcfData
+    return {
+      company: {
+        symbol: company.symbol,
+        companyName: company.companyName,
+        sector: company.sector,
+        industry: company.industry,
+        marketCap: company.mktCap,
+        price: company.price
+      },
+      historicalFinancials: {
+        revenue: financials.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.revenue || 0
+        })).reverse(),
+        netIncome: financials.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.netIncome || 0
+        })).reverse(),
+        freeCashFlow: cashFlow.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.freeCashFlow || 0
+        })).reverse(),
+        totalDebt: balanceSheet.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.totalDebt || 0
+        })).reverse(),
+        cash: balanceSheet.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.cashAndCashEquivalents || 0
+        })).reverse(),
+        sharesOutstanding: financials.map((f: any) => ({
+          year: new Date(f.date).getFullYear(),
+          value: f.weightedAverageShsOut || 0
+        })).reverse()
+      },
+      marketData: {
+        beta: company.beta || 1.0,
+        riskFreeRate: 4.5, // Current 10Y Treasury
+        marketRiskPremium: 6.0, // Historical market premium
+        costOfDebt: 5.0, // Estimated
+        taxRate: 21.0 // Corporate tax rate
+      },
+      priceHistory: priceHistory.historical?.slice(0, 252).map((p: any) => ({
+        date: p.date,
+        price: p.close
+      })).reverse() || []
+    }
   } catch (error) {
     console.error(`[FMP] Error fetching DCF data for ${symbol}:`, error)
     return null
