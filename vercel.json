@@ -5,6 +5,6 @@
   "installCommand": "cd frontend && npm install",
   "rootDirectory": "frontend",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://your-backend-url.railway.app"
+    "NEXT_PUBLIC_API_URL": "https://ai-portfolio-manager-krrs.onrender.com"
   }
 }
