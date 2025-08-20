@@ -88,3 +88,7 @@ ai-manager/
 ### Portfolio Management
 - `GET /api/portfolios` - Portfolio list
 - `GET /api/portfolios/{id}` - Portfolio details
+
+## Live Demo
+- **Frontend**: https://ai-portfolio-manager.vercel.app
+- **Backend**: https://ai-portfolio-manager-krrs.onrender.com
