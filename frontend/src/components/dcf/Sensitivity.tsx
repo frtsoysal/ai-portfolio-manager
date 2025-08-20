@@ -310,7 +310,7 @@ export default function SensitivityPanel({ model, dcfData, onModelChange, active
                 <div className="grid grid-cols-3 gap-4">
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-sm text-muted-foreground">Prob. > Current</div>
+                      <div className="text-sm text-muted-foreground">Prob. &gt; Current</div>
                       <div className="text-2xl font-bold text-green-600">68%</div>
                     </CardContent>
                   </Card>
