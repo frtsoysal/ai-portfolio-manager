@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DCFModel, DCFData } from '@/types/dcf'
+import { DCFModel, DCFData, DCFInputs } from '@/types/dcf'
 import { runSensitivityAnalysis, calculateTornadoChart, runMonteCarloSimulation } from '@/lib/dcf/scenarios'
 import { Activity, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react'
 
@@ -25,12 +25,12 @@ export default function SensitivityPanel({ model, dcfData, onModelChange, active
     if (model && dcfData) {
       // Calculate tornado chart data
       const parameters = [
-        { name: 'terminalGrowthRate', label: 'Terminal Growth Rate', variation: 0.2 },
-        { name: 'beta', label: 'Beta', variation: 0.15 },
-        { name: 'revenueGrowthRates', label: 'Revenue Growth (Y1)', variation: 0.25 },
-        { name: 'operatingMargins', label: 'Operating Margin', variation: 0.15 },
-        { name: 'taxRate', label: 'Tax Rate', variation: 0.1 },
-        { name: 'riskFreeRate', label: 'Risk Free Rate', variation: 0.2 }
+        { name: 'terminalGrowthRate' as keyof DCFInputs, label: 'Terminal Growth Rate', variation: 0.2 },
+        { name: 'beta' as keyof DCFInputs, label: 'Beta', variation: 0.15 },
+        { name: 'revenueGrowthRates' as keyof DCFInputs, label: 'Revenue Growth (Y1)', variation: 0.25 },
+        { name: 'operatingMargins' as keyof DCFInputs, label: 'Operating Margin', variation: 0.15 },
+        { name: 'taxRate' as keyof DCFInputs, label: 'Tax Rate', variation: 0.1 },
+        { name: 'riskFreeRate' as keyof DCFInputs, label: 'Risk Free Rate', variation: 0.2 }
       ]
       
       try {
