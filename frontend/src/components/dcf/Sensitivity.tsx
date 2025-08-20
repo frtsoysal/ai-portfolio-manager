@@ -26,11 +26,11 @@ export default function SensitivityPanel({ model, dcfData, onModelChange, active
       // Calculate tornado chart data
       const parameters = [
         { name: 'terminalGrowthRate', label: 'Terminal Growth Rate', variation: 0.2 },
-        { name: 'wacc', label: 'WACC', variation: 0.15 },
+        { name: 'beta', label: 'Beta', variation: 0.15 },
         { name: 'revenueGrowthRates', label: 'Revenue Growth (Y1)', variation: 0.25 },
         { name: 'operatingMargins', label: 'Operating Margin', variation: 0.15 },
         { name: 'taxRate', label: 'Tax Rate', variation: 0.1 },
-        { name: 'capexPercent', label: 'CapEx % Revenue', variation: 0.2 }
+        { name: 'riskFreeRate', label: 'Risk Free Rate', variation: 0.2 }
       ]
       
       try {
