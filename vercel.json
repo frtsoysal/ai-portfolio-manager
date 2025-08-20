@@ -1,4 +1,9 @@
 {
+  "build": {
+    "env": {
+      "NODE_VERSION": "22"
+    }
+  },
   "env": {
     "NEXT_PUBLIC_API_URL": "https://ai-portfolio-manager-krrs.onrender.com"
   }
