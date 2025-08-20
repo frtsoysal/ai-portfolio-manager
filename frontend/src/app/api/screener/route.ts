@@ -37,8 +37,7 @@ const CACHE_TTL = 12 * 60 * 60 * 1000 // 12 hours
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const refresh = searchParams.get('refresh') === '1'
+    const refresh = request.nextUrl.searchParams.get('refresh') === '1'
     
     const cacheKey = 'sp500-screener'
     const cached = cache.get(cacheKey)
