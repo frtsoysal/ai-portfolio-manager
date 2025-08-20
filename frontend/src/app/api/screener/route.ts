@@ -35,9 +35,10 @@ export interface ScreenerRow {
 const cache = new Map<string, { data: ScreenerRow[], timestamp: number }>()
 const CACHE_TTL = 12 * 60 * 60 * 1000 // 12 hours
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const refresh = request.nextUrl.searchParams.get('refresh') === '1'
+    // Remove dynamic searchParams to enable static generation
+    const refresh = false // Always use cache for static generation
     
     const cacheKey = 'sp500-screener'
     const cached = cache.get(cacheKey)
