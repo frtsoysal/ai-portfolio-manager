@@ -67,7 +67,7 @@ export default function ScreenerPage() {
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase()
         if (!company.symbol.toLowerCase().includes(searchTerm) && 
-            !company.name.toLowerCase().includes(searchTerm)) {
+            !company.company_name.toLowerCase().includes(searchTerm)) {
           return false
         }
       }

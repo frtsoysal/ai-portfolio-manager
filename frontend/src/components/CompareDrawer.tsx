@@ -163,7 +163,7 @@ export default function CompareDrawer() {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{company.symbol}</div>
-                              <div className="text-sm text-gray-500 truncate max-w-48">{company.name}</div>
+                              <div className="text-sm text-gray-500 truncate max-w-48">{company.company_name}</div>
                             </div>
                           </div>
                         </td>

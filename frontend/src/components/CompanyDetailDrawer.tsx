@@ -38,7 +38,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
   }
 
   // Get logo from Clearbit or use placeholder
-  const logoUrl = `https://logo.clearbit.com/${company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
+  const logoUrl = `https://logo.clearbit.com/${company.company_name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
   const fallbackLogo = `https://ui-avatars.com/api/?name=${company.symbol}&size=64&background=3B82F6&color=ffffff&format=svg`
 
   // Calculate 52-week position color
@@ -84,7 +84,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
                     src={logoUrl}
-                    alt={company.name}
+                    alt={company.company_name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = fallbackLogo
@@ -93,7 +93,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{company.symbol}</h2>
-                  <p className="text-sm text-gray-600 truncate max-w-48">{company.name}</p>
+                  <p className="text-sm text-gray-600 truncate max-w-48">{company.company_name}</p>
                 </div>
               </div>
               <button
