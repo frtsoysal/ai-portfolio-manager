@@ -11,6 +11,7 @@ interface ValuationCardProps {
 
 export default function ValuationCard({ valuation, currency }: ValuationCardProps) {
   const formatCurrency = (value: number) => {
+    if (!value || isNaN(value)) return `${currency} 0.00`
     if (value >= 1e9) return `${currency} ${(value / 1e9).toFixed(1)}B`
     if (value >= 1e6) return `${currency} ${(value / 1e6).toFixed(1)}M`
     return `${currency} ${value.toFixed(2)}`
