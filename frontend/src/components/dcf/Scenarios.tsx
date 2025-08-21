@@ -306,19 +306,19 @@ export default function ScenariosPanel({
                           })}
                         </tr>
                         <tr className="border-b">
-                          <td className="py-2 px-3 font-medium">Operating Margin</td>
+                          <td className="py-2 px-3 font-medium">EBITDA Margin</td>
                           {scenarios.map(scenario => {
                             const margin = scenario.name === 'Base Case' 
-                              ? (model?.inputs.operatingMargins?.[0] || 0) * 100
+                              ? (model?.inputs.ebitdaMargins?.[0] || 0) * 100
                               : scenario.name === 'Bull Case' 
-                                ? ((model?.inputs.operatingMargins?.[0] || 0) * 1.2) * 100
+                                ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 1.2) * 100
                                 : scenario.name === 'Bear Case'
-                                  ? ((model?.inputs.operatingMargins?.[0] || 0) * 0.8) * 100
+                                  ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 0.8) * 100
                                   : scenario.name === 'High Growth'
-                                    ? ((model?.inputs.operatingMargins?.[0] || 0) * 1.1) * 100
+                                    ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 1.1) * 100
                                     : scenario.name === 'Recession'
-                                      ? ((model?.inputs.operatingMargins?.[0] || 0) * 0.7) * 100
-                                      : (model?.inputs.operatingMargins?.[0] || 0) * 100
+                                      ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 0.7) * 100
+                                      : (model?.inputs.ebitdaMargins?.[0] || 0) * 100
                             return (
                               <td key={scenario.name} className="text-center py-2 px-3">
                                 {margin.toFixed(1)}%
@@ -350,18 +350,17 @@ export default function ScenariosPanel({
                         <tr>
                           <td className="py-2 px-3 font-medium">WACC</td>
                           {scenarios.map(scenario => {
-                            const baseWacc = model?.valuation?.wacc || 0.1
                             const wacc = scenario.name === 'Base Case' 
-                              ? baseWacc * 100
+                              ? (model?.inputs.wacc || 0) * 100
                               : scenario.name === 'Bull Case' 
-                                ? (baseWacc - 0.005) * 100
+                                ? ((model?.inputs.wacc || 0) - 0.005) * 100
                                 : scenario.name === 'Bear Case'
-                                  ? (baseWacc + 0.005) * 100
+                                  ? ((model?.inputs.wacc || 0) + 0.005) * 100
                                   : scenario.name === 'High Growth'
-                                    ? (baseWacc - 0.01) * 100
+                                    ? ((model?.inputs.wacc || 0) - 0.01) * 100
                                     : scenario.name === 'Recession'
-                                      ? (baseWacc + 0.01) * 100
-                                      : baseWacc * 100
+                                      ? ((model?.inputs.wacc || 0) + 0.01) * 100
+                                      : (model?.inputs.wacc || 0) * 100
                             return (
                               <td key={scenario.name} className="text-center py-2 px-3">
                                 {wacc.toFixed(1)}%

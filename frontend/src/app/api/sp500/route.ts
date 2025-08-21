@@ -1,89 +1,78 @@
-import { NextResponse } from 'next/server'
-import { getScreenerData } from '@/lib/fmpAggregator'
+import { NextRequest, NextResponse } from 'next/server'
 
-export const runtime = 'nodejs'
-export const revalidate = 43200 // 12 hours ISR
+export const revalidate = 43200 // Cache for 12 hours
 
 interface Company {
   symbol: string
   company_name: string
   sector: string
   industry: string
-  current_price: number
-  day_change_percent: number
   market_cap: number
-  pe_ratio?: number
-  dividend_yield?: number
-  beta?: number
-  week52_high?: number
-  week52_low?: number
-  avg_volume?: number
-  revenue_growth_ttm?: number
-  net_margin?: number
-  roe?: number
-  roa?: number
-  enterprise_value?: number
-  ebitda?: number
-  pb_ratio?: number
-  ps_ratio?: number
-  forward_pe?: number
+  current_price: number
+  pe_ratio: number
+  roe: number
+  pb_ratio: number
+  debt_equity: number
+  dividend_yield: number
+  data_quality: string
 }
 
-interface SP500Response {
+interface SP500Data {
+  total_companies: number
+  collection_date: string
   companies: Company[]
-  total_count: number
-  last_updated: string
 }
 
-export async function GET() {
+// In-memory cache
+const cache = new Map<string, { data: SP500Data, timestamp: number }>()
+const CACHE_TTL = 12 * 60 * 60 * 1000 // 12 hours
+
+export async function GET(request: NextRequest) {
+  const cacheKey = 'sp500_overview'
+  const now = Date.now()
+  
+  // Check cache first
+  const cached = cache.get(cacheKey)
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return NextResponse.json(cached.data)
+  }
+
   try {
-    const data = await getScreenerData()
+    // Fetch from backend
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8001'
+    const response = await fetch(`${backendUrl}/api/sp500/overview`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Add timeout
+      signal: AbortSignal.timeout(30000)
+    })
+
+    if (!response.ok) {
+      throw new Error(`Backend responded with status: ${response.status}`)
+    }
+
+    const data: SP500Data = await response.json()
     
-    // Transform aggregator data to SP500 format
-    const companies: Company[] = data.map((company) => ({
-      symbol: company.symbol,
-      company_name: company.companyName,
-      sector: company.sector,
-      industry: company.industry,
-      current_price: company.price,
-      day_change_percent: company.changePercent,
-      market_cap: company.marketCap,
-      pe_ratio: company.pe,
-      dividend_yield: company.dividendYield,
-      beta: company.beta,
-      week52_high: company.week52High,
-      week52_low: company.week52Low,
-      avg_volume: company.avgVolume,
-      revenue_growth_ttm: undefined, // Not available in aggregator
-      net_margin: undefined, // Not available in aggregator
-      roe: undefined, // Not available in aggregator
-      roa: undefined, // Not available in aggregator
-      enterprise_value: undefined, // Not available in aggregator
-      ebitda: undefined, // Not available in aggregator
-      pb_ratio: undefined, // Not available in aggregator
-      ps_ratio: undefined, // Not available in aggregator
-      forward_pe: undefined // Not available in aggregator
-    }))
+    // Update cache
+    cache.set(cacheKey, { data, timestamp: now })
     
-    const response: SP500Response = {
-      companies,
-      total_count: companies.length,
-      last_updated: new Date().toISOString()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error fetching S&P 500 data from backend:', error)
+    
+    // Return cached data if available, even if expired
+    const cached = cache.get(cacheKey)
+    if (cached) {
+      console.log('Returning expired cache due to backend error')
+      return NextResponse.json(cached.data)
     }
     
+    // Return mock data as fallback
     return NextResponse.json({
-      ...response,
-      cached: false
+      total_companies: 0,
+      collection_date: new Date().toISOString(),
+      companies: []
     })
-  } catch (error) {
-    console.error('Error fetching S&P 500 data:', error)
-    
-    return NextResponse.json(
-      { 
-        error: 'Failed to fetch S&P 500 data',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
-    )
   }
 }

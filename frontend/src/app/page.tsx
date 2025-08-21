@@ -1,205 +1,253 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import Link from 'next/link'
 
 export default function Home() {
-  const [apiStatus, setApiStatus] = useState('Backend bağlantısı test ediliyor...');
-
-  useEffect(() => {
-    // Test backend connection
-    const testAPI = async () => {
-      try {
-        const response = await fetch('/api/health');
-        const data = await response.json();
-        setApiStatus(`✅ Backend API: ${data.message || 'Başarılı'}`);
-      } catch (error) {
-        setApiStatus('❌ Backend API: Bağlantı kurulamadı');
-      }
-    };
-
-    testAPI();
-  }, []);
-
   return (
-    <>
-      <style jsx>{`
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background: linear-gradient(135deg, #1e293b, #334155);
-          color: white;
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        
-        .container {
-          text-align: center;
-          max-width: 800px;
-          padding: 2rem;
-        }
-        
-        .title {
-          font-size: 4rem;
-          margin-bottom: 1rem;
-          background: linear-gradient(45deg, #3b82f6, #8b5cf6);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-        
-        .subtitle {
-          font-size: 1.5rem;
-          margin-bottom: 3rem;
-          color: #cbd5e1;
-          line-height: 1.6;
-        }
-        
-        .buttons {
-          display: flex;
-          gap: 1.5rem;
-          justify-content: center;
-          flex-wrap: wrap;
-          margin-bottom: 3rem;
-        }
-        
-        .btn {
-          padding: 1rem 2rem;
-          border-radius: 12px;
-          text-decoration: none;
-          font-weight: bold;
-          font-size: 1.1rem;
-          transition: transform 0.2s;
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn:hover {
-          transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-          background-color: #3b82f6;
-          color: white;
-        }
-        
-        .btn-secondary {
-          background-color: #10b981;
-          color: white;
-        }
-        
-        .btn-api {
-          background-color: #f59e0b;
-          color: white;
-        }
-        
-        .btn-dcf {
-          background-color: #8b5cf6;
-          color: white;
-        }
-        
-        .status-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1.5rem;
-          margin-top: 2rem;
-        }
-        
-        .status-card {
-          background: rgba(255, 255, 255, 0.1);
-          padding: 1.5rem;
-          border-radius: 12px;
-          backdrop-filter: blur(10px);
-        }
-        
-        .status-icon {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-        }
-        
-        .status-title {
-          font-weight: bold;
-          margin-bottom: 0.5rem;
-        }
-        
-        .status-detail {
-          font-size: 0.9rem;
-          color: #cbd5e1;
-        }
-        
-        .api-test {
-          margin-top: 2rem;
-          padding: 1rem;
-          background: rgba(0, 0, 0, 0.2);
-          border-radius: 8px;
-          font-family: monospace;
-          text-align: left;
-        }
-      `}</style>
-      
-      <div className="container">
-        <h1 className="title">🚀 AI Portfolio Manager</h1>
-        
-        <p className="subtitle">
-          AI destekli portföy yönetim uygulaması başarıyla çalışıyor!<br />
-          Backend ve Frontend servisleri aktif.
-        </p>
-        
-        <div className="buttons">
-          <Link href="/portfolios" className="btn btn-primary">
-            📊 Portföyleri Gör
-          </Link>
-          
-          <Link href="/sp500" className="btn btn-secondary">
-            📈 S&P 500 Dashboard
-          </Link>
-          
-          <Link href="/screener" className="btn btn-api">
-            🔍 Stock Screener
-          </Link>
-          
-          <Link href="/dcf/AAPL" className="btn btn-dcf">
-            📊 DCF Analysis
-          </Link>
-        </div>
-        
-        <div className="status-grid">
-          <div className="status-card">
-            <div className="status-icon">✅</div>
-            <div className="status-title">Backend API</div>
-            <div className="status-detail">Next.js API Routes - Aktif</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-20">
+        <svg className="w-full h-full" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.3"/>
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#grid)" />
+        </svg>
+      </div>
+
+      {/* Hero Section */}
+      <div className="relative z-10">
+        {/* Header/Navigation */}
+        <nav className="flex justify-between items-center p-6 lg:px-12">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">AI</span>
+            </div>
+            <span className="text-white font-semibold text-xl">Portfolio Manager</span>
           </div>
           
-          <div className="status-card">
-            <div className="status-icon">✅</div>
-            <div className="status-title">Frontend</div>
-            <div className="status-detail">Next.js 14 - Aktif</div>
+          <div className="hidden md:flex items-center space-x-8">
+            <Link href="/portfolios" className="text-gray-300 hover:text-white transition-colors">
+              Portfolios
+            </Link>
+            <Link href="/sp500" className="text-gray-300 hover:text-white transition-colors">
+              S&P 500
+            </Link>
+            <Link href="/screener" className="text-gray-300 hover:text-white transition-colors">
+              Screener
+            </Link>
+            <Link href="/dcf/AAPL" className="text-gray-300 hover:text-white transition-colors">
+              DCF Analysis
+            </Link>
+            <Link href="#features" className="text-gray-300 hover:text-white transition-colors">
+              Features
+            </Link>
+            <Link href="#about" className="text-gray-300 hover:text-white transition-colors">
+              About
+            </Link>
+            <Link href="/portfolios" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors">
+              Get Started
+            </Link>
           </div>
-          
-          <div className="status-card">
-            <div className="status-icon">🗂️</div>
-            <div className="status-title">S&P 500 Data</div>
-            <div className="status-detail">503 Companies</div>
+        </nav>
+
+        {/* Hero Content */}
+        <div className="max-w-6xl mx-auto px-6 pt-20 pb-32">
+          <div className="text-center">
+            <h1 className="text-5xl lg:text-7xl font-bold text-white mb-8 leading-tight">
+              AI Beats Human{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+                Emotions
+              </span>{' '}
+              in Investing
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed">
+              Our AI portfolio manager eliminates emotional decision-making, delivering consistent returns through 
+              data-driven strategies that outperform traditional human advisors.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+              <Link 
+                href="/portfolios"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+              >
+                Start AI Investing
+              </Link>
+              <Link 
+                href="/sp500"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+              >
+                📈 S&P 500 Dashboard
+              </Link>
+                              <Link
+                  href="/dcf/AAPL"
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+                >
+                  🧮 DCF Analysis
+                </Link>
+                <Link
+                  href="#features"
+                  className="border border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+                >
+                  Learn More
+                </Link>
+            </div>
+
+            {/* Portfolio Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                <div className="text-3xl font-bold text-white mb-2">5</div>
+                <div className="text-gray-400">Portfolio Strategies</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                <div className="text-3xl font-bold text-green-400 mb-2">+28.4%</div>
+                <div className="text-gray-400">Average Annual Return</div>
+              </div>
+              <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6">
+                <div className="text-3xl font-bold text-blue-400 mb-2">24/7</div>
+                <div className="text-gray-400">AI Monitoring</div>
+              </div>
+            </div>
           </div>
-          
-          <div className="status-card">
-            <div className="status-icon">🤖</div>
-            <div className="status-title">AI Engine</div>
-            <div className="status-detail">Ready</div>
-          </div>
-        </div>
-        
-        <div className="api-test">
-          <strong>🔗 API Test:</strong><br />
-          <span>{apiStatus}</span>
         </div>
       </div>
-    </>
-  );
+
+      {/* Features Section */}
+      <section id="features" className="relative z-10 bg-white py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6">
+              Why Choose AI Portfolio Management?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Our advanced AI system analyzes market trends, manages risk, and optimizes your portfolio 
+              performance without emotional bias.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">🤖</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">AI-Driven Decisions</h3>
+              <p className="text-gray-600">
+                Advanced machine learning algorithms analyze market data 24/7 to make optimal investment decisions.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">📊</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">5 Portfolio Strategies</h3>
+              <p className="text-gray-600">
+                Choose from Growth, Value, Momentum, Crypto, and Turkish Stars portfolios tailored to your goals.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="bg-gradient-to-br from-purple-50 to-violet-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">⚡</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Real-Time Monitoring</h3>
+              <p className="text-gray-600">
+                Track performance, risk metrics, and AI recommendations in real-time with beautiful dashboards.
+              </p>
+            </div>
+
+            {/* Feature 4 */}
+            <div className="bg-gradient-to-br from-orange-50 to-red-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-orange-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">🛡️</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Risk Management</h3>
+              <p className="text-gray-600">
+                Sophisticated risk assessment and portfolio balancing to protect your investments.
+              </p>
+            </div>
+
+            {/* Feature 5 */}
+            <div className="bg-gradient-to-br from-teal-50 to-cyan-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-teal-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">💡</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Smart Insights</h3>
+              <p className="text-gray-600">
+                Get personalized AI recommendations and market insights to optimize your investment strategy.
+              </p>
+            </div>
+
+            {/* Feature 6 */}
+            <div className="bg-gradient-to-br from-rose-50 to-pink-100 p-8 rounded-xl">
+              <div className="w-12 h-12 bg-rose-600 rounded-lg flex items-center justify-center mb-4">
+                <span className="text-white text-2xl">📈</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Performance Analytics</h3>
+              <p className="text-gray-600">
+                Detailed performance tracking with charts, comparisons, and historical analysis.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative z-10 bg-gray-900 py-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            Ready to Start Your AI Investment Journey?
+          </h2>
+          <p className="text-xl text-gray-300 mb-10">
+            Join thousands of investors who trust AI to manage their portfolios and achieve better returns.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/portfolios"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-lg font-semibold text-lg transition-all transform hover:scale-105 shadow-lg"
+            >
+              Explore Portfolios
+            </Link>
+            <Link 
+              href="/portfolios?type=growth"
+              className="border border-gray-600 text-gray-300 hover:text-white hover:border-gray-400 px-10 py-4 rounded-lg font-semibold text-lg transition-colors"
+            >
+              View Growth Portfolio
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 bg-slate-900 border-t border-gray-800 py-12">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="flex items-center space-x-2 mb-4 md:mb-0">
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">AI</span>
+              </div>
+              <span className="text-white font-semibold text-xl">Portfolio Manager</span>
+            </div>
+            
+            <div className="flex items-center space-x-8">
+              <Link href="/portfolios" className="text-gray-400 hover:text-white transition-colors">
+                Portfolios
+              </Link>
+              <Link href="#features" className="text-gray-400 hover:text-white transition-colors">
+                Features
+              </Link>
+              <span className="text-gray-500 text-sm">
+                © 2024 AI Portfolio Manager. Built with Next.js & FastAPI.
+              </span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
 }

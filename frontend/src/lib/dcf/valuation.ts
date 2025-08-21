@@ -192,7 +192,7 @@ export const runDCFValuation = (
   // Calculate revenue CAGR
   const firstHistorical = historicalProjections[0]
   const lastForecast = forecastProjections[forecastProjections.length - 1]
-  const totalYears = (lastForecast.year as number) - (firstHistorical.year as number)
+  const totalYears = lastForecast.year as number - firstHistorical.year as number
   const revenueCAGR = calculateCAGR(firstHistorical.revenue, lastForecast.revenue, totalYears)
   
   // Calculate average operating margin
