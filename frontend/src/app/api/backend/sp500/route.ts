@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { httpGetJSON } from '../../../../../lib/backend'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     
     // Pass through query params to backend
     const backendParams: Record<string, string> = {}
