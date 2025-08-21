@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-S&P 500 Dashboard Service - Frontend için optimized data serving
+S&P 500 Dashboard Service - Frontend için optimized data serving with FMP API
 """
 import json
-import pandas as pd
+import requests
 from typing import Dict, List, Optional
 from datetime import datetime
 import os
@@ -11,55 +11,100 @@ import os
 
 class SP500DashboardService:
     def __init__(self):
-        self.dataset_file = "sp500_complete_premium_dataset.json"
-        self.dataset = None
-        self.load_dataset()
+        # FMP API configuration
+        self.fmp_api_key = os.getenv('FMP_API_KEY', 'demo')  # Use demo if no key
+        self.fmp_base_url = "https://financialmodelingprep.com/api/v3"
+        
+        # S&P 500 symbols (top 50 for performance)
+        self.sp500_symbols = [
+            'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'BRK.B', 'UNH', 'JNJ',
+            'JPM', 'V', 'PG', 'XOM', 'HD', 'CVX', 'MA', 'BAC', 'ABBV', 'PFE',
+            'AVGO', 'KO', 'LLY', 'TMO', 'COST', 'MRK', 'WMT', 'ACN', 'NFLX', 'DHR',
+            'VZ', 'ABT', 'ADBE', 'CRM', 'NKE', 'TXN', 'RTX', 'QCOM', 'NEE', 'PM',
+            'ORCL', 'DIS', 'T', 'LOW', 'UPS', 'IBM', 'AMGN', 'HON', 'SPGI', 'GS'
+        ]
+        
+        print(f"📊 FMP Dashboard Service initialized with {len(self.sp500_symbols)} symbols")
     
-    def load_dataset(self):
-        """Load the S&P 500 dataset into memory"""
-        if os.path.exists(self.dataset_file):
-            print(f"📊 Loading {self.dataset_file}...")
-            with open(self.dataset_file, 'r') as f:
-                self.dataset = json.load(f)
-            print(f"✅ Loaded {len(self.dataset['companies'])} companies")
-        else:
-            print(f"❌ Dataset file not found: {self.dataset_file}")
-            self.dataset = None
+    def _make_fmp_request(self, endpoint: str, params: Dict = None) -> Optional[Dict]:
+        """Make request to FMP API"""
+        try:
+            url = f"{self.fmp_base_url}/{endpoint}"
+            params = params or {}
+            params['apikey'] = self.fmp_api_key
+            
+            response = requests.get(url, params=params, timeout=10)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"❌ FMP API error: {response.status_code}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ FMP request failed: {e}")
+            return None
     
     def get_companies_overview(self) -> Dict:
-        """Get overview of all S&P 500 companies"""
-        if not self.dataset:
-            return {"error": "Dataset not available"}
-        
+        """Get overview of all S&P 500 companies using FMP API"""
         companies = []
         
-        for symbol, data in self.dataset['companies'].items():
+        # Get batch data for all symbols
+        symbols_str = ','.join(self.sp500_symbols)
+        
+        # Get company profiles
+        profiles = self._make_fmp_request(f"profile/{symbols_str}")
+        if not profiles:
+            return {"error": "Failed to fetch company profiles"}
+        
+        # Get current quotes
+        quotes = self._make_fmp_request(f"quote/{symbols_str}")
+        if not quotes:
+            quotes = []
+        
+        # Get key metrics (ratios)
+        metrics = self._make_fmp_request(f"key-metrics/{symbols_str}")
+        if not metrics:
+            metrics = []
+        
+        # Create lookup dictionaries
+        quotes_dict = {q.get('symbol'): q for q in quotes} if quotes else {}
+        metrics_dict = {m.get('symbol'): m for m in metrics} if metrics else {}
+        
+        for profile in profiles:
             try:
-                # Get company profile
-                profile = data['fundamentals'].get('company_profile', [])
-                profile_data = profile[0] if profile else {}
+                symbol = profile.get('symbol')
+                if not symbol:
+                    continue
                 
-                # Get latest ratios
-                ratios = data['fundamentals'].get('ratios', [])
-                latest_ratios = ratios[0] if ratios else {}
-                
-                # Get latest prices
-                prices = data.get('prices', [])
-                latest_price = prices[0] if prices else {}
+                # Get corresponding quote and metrics
+                quote = quotes_dict.get(symbol, {})
+                metric = metrics_dict.get(symbol, {})
                 
                 company_info = {
                     'symbol': symbol,
-                    'company_name': profile_data.get('companyName', symbol),
-                    'sector': profile_data.get('sector', 'Unknown'),
-                    'industry': profile_data.get('industry', 'Unknown'),
-                    'market_cap': profile_data.get('mktCap', 0),
-                    'current_price': latest_price.get('close', 0),
-                    'pe_ratio': latest_ratios.get('priceEarningsRatio'),
-                    'roe': latest_ratios.get('returnOnEquity'),
-                    'pb_ratio': latest_ratios.get('priceToBookRatio'),
-                    'debt_equity': latest_ratios.get('debtEquityRatio'),
-                    'dividend_yield': latest_ratios.get('dividendYield'),
-                    'data_quality': data.get('data_quality', 'complete')
+                    'company_name': profile.get('companyName', symbol),
+                    'sector': profile.get('sector', 'Unknown'),
+                    'industry': profile.get('industry', 'Unknown'),
+                    'market_cap': profile.get('mktCap', 0),
+                    'current_price': quote.get('price', 0),
+                    'day_change_percent': quote.get('changesPercentage', 0),
+                    'pe_ratio': metric.get('peRatio'),
+                    'pb_ratio': metric.get('pbRatio'),
+                    'ps_ratio': metric.get('psRatio'),
+                    'roe': metric.get('roe'),
+                    'roa': metric.get('roa'),
+                    'debt_equity': metric.get('debtToEquity'),
+                    'dividend_yield': metric.get('dividendYield'),
+                    'beta': profile.get('beta'),
+                    'week52_high': quote.get('yearHigh'),
+                    'week52_low': quote.get('yearLow'),
+                    'avg_volume': quote.get('avgVolume'),
+                    'enterprise_value': metric.get('enterpriseValue'),
+                    'ebitda': metric.get('ebitda'),
+                    'revenue_growth_ttm': metric.get('revenueGrowthTTM'),
+                    'net_margin': metric.get('netIncomeMargin'),
+                    'data_quality': 'live'
                 }
                 companies.append(company_info)
                 
@@ -72,7 +117,7 @@ class SP500DashboardService:
         
         return {
             'total_companies': len(companies),
-            'collection_date': self.dataset['metadata']['collection_date'],
+            'collection_date': datetime.now().isoformat(),
             'companies': companies
         }
     
