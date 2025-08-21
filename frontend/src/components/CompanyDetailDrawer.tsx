@@ -1,6 +1,6 @@
 'use client'
 
-import { ScreenerRow } from '../app/api/screener/route'
+import { ScreenerRow } from '../types/screener'
 import { DetailSparkline } from './Sparkline'
 import { useCompare } from './CompareContext'
 import { Button } from './ui/button'

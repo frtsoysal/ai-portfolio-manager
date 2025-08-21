@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useState, ReactNode } from 'react'
-import { ScreenerRow } from '../app/api/screener/route'
+import { ScreenerRow } from '../types/screener'
 
 interface CompareContextType {
   compareList: ScreenerRow[]

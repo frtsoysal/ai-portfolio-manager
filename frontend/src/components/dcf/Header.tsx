@@ -54,7 +54,7 @@ export default function DCFHeader({ company, market, valuation }: DCFHeaderProps
             <h1 className="text-3xl font-bold">{company.symbol}</h1>
             <Badge variant="secondary">{company.sector}</Badge>
           </div>
-          <p className="text-lg text-muted-foreground mt-1">{company.company_name}</p>
+          <p className="text-lg text-muted-foreground mt-1">{company.name}</p>
           <p className="text-sm text-muted-foreground">
             {company.industry} • {company.country}
           </p>
