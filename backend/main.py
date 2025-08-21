@@ -22,7 +22,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://localhost:3001",
-        "https://ai-portfolio-manager-ashen.vercel.app"
+        "https://ai-portfolio-manager-ashen.vercel.app",
+        "https://ai-portfolio-manager-six.vercel.app"
     ],  # Frontend URL'leri
     allow_credentials=True,
     allow_methods=["*"],
@@ -335,6 +336,72 @@ async def get_sp500_summary():
     }
     
     return summary
+
+# Screener endpoint
+@app.get("/api/screener")
+async def get_screener_data(
+    sector: str = None,
+    min_market_cap: float = None,
+    max_market_cap: float = None,
+    min_pe: float = None,
+    max_pe: float = None,
+    min_dividend: float = None,
+    page: int = 1,
+    limit: int = 50
+):
+    """Stock screener with filtering capabilities"""
+    dashboard = get_dashboard_service()
+    overview = dashboard.get_companies_overview()
+    
+    if 'error' in overview:
+        return overview
+    
+    companies = overview['companies']
+    
+    # Apply filters
+    filtered_companies = companies
+    
+    if sector:
+        filtered_companies = [c for c in filtered_companies if c.get('sector', '').lower() == sector.lower()]
+    
+    if min_market_cap is not None:
+        filtered_companies = [c for c in filtered_companies if c.get('market_cap', 0) >= min_market_cap]
+    
+    if max_market_cap is not None:
+        filtered_companies = [c for c in filtered_companies if c.get('market_cap', 0) <= max_market_cap]
+    
+    if min_pe is not None:
+        filtered_companies = [c for c in filtered_companies if c.get('pe_ratio') and c['pe_ratio'] >= min_pe]
+    
+    if max_pe is not None:
+        filtered_companies = [c for c in filtered_companies if c.get('pe_ratio') and c['pe_ratio'] <= max_pe]
+    
+    if min_dividend is not None:
+        filtered_companies = [c for c in filtered_companies if c.get('dividend_yield', 0) >= min_dividend]
+    
+    # Pagination
+    total = len(filtered_companies)
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_companies = filtered_companies[start:end]
+    
+    return {
+        'companies': paginated_companies,
+        'pagination': {
+            'page': page,
+            'limit': limit,
+            'total': total,
+            'pages': (total + limit - 1) // limit
+        },
+        'filters_applied': {
+            'sector': sector,
+            'min_market_cap': min_market_cap,
+            'max_market_cap': max_market_cap,
+            'min_pe': min_pe,
+            'max_pe': max_pe,
+            'min_dividend': min_dividend
+        }
+    }
 
 @app.get("/api/sp500/companies")
 async def get_sp500_companies_paginated(
