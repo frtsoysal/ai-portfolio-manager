@@ -61,6 +61,11 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
   }
 
   const riskLevel = getRiskLevel(company.beta)
+  
+  // Calculate 52-week position
+  const week52Position = company.week52_high && company.week52_low && company.week52_high !== company.week52_low
+    ? (company.current_price - company.week52_low) / (company.week52_high - company.week52_low)
+    : null
 
   return (
     <>
@@ -205,14 +210,14 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                   <span className="text-sm text-gray-600">52-Week Position</span>
                   <div className="text-right">
                     <span className="font-medium">
-                      {company.week52Position ? `${(company.week52Position * 100).toFixed(0)}%` : 'N/A'}
+                      {week52Position ? `${(week52Position * 100).toFixed(0)}%` : 'N/A'}
                     </span>
-                    {company.week52Position && (
-                      <div className={`text-xs ${get52WeekColor(company.week52Position)}`}>
-                        {company.week52Position >= 0.8 ? 'Near High' :
-                         company.week52Position >= 0.6 ? 'Above Mid' :
-                         company.week52Position >= 0.4 ? 'Mid Range' :
-                         company.week52Position >= 0.2 ? 'Below Mid' : 'Near Low'}
+                    {week52Position && (
+                      <div className={`text-xs ${get52WeekColor(week52Position)}`}>
+                        {week52Position >= 0.8 ? 'Near High' :
+                         week52Position >= 0.6 ? 'Above Mid' :
+                         week52Position >= 0.4 ? 'Mid Range' :
+                         week52Position >= 0.2 ? 'Below Mid' : 'Near Low'}
                       </div>
                     )}
                   </div>
@@ -221,23 +226,23 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
             </div>
 
             {/* 52-Week Range Visual */}
-            {company.week52High && company.week52Low && (
+            {company.week52_high && company.week52_low && (
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-3">52-Week Range</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>${company.week52Low.toFixed(2)}</span>
-                    <span>${company.week52High.toFixed(2)}</span>
+                    <span>${company.week52_low.toFixed(2)}</span>
+                    <span>${company.week52_high.toFixed(2)}</span>
                   </div>
                   <div className="relative h-2 bg-gray-200 rounded-full">
                     <div 
                       className="absolute h-2 bg-gradient-to-r from-red-400 to-green-400 rounded-full"
                       style={{ width: '100%' }}
                     />
-                    {company.week52Position && (
+                    {week52Position && (
                       <div 
                         className="absolute w-3 h-3 bg-blue-600 rounded-full transform -translate-x-1/2 -translate-y-0.5 border-2 border-white shadow"
-                        style={{ left: `${company.week52Position * 100}%`, top: '50%' }}
+                        style={{ left: `${week52Position * 100}%`, top: '50%' }}
                       />
                     )}
                   </div>
@@ -267,7 +272,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Avg Volume</span>
                   <span className="font-medium">
-                    {company.avgVolume ? (company.avgVolume / 1e6).toFixed(1) + 'M' : 'N/A'}
+                    {company.avg_volume ? (company.avg_volume / 1e6).toFixed(1) + 'M' : 'N/A'}
                   </span>
                 </div>
               </div>
@@ -278,7 +283,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <h3 className="text-lg font-medium text-gray-900 mb-3">Price Trend (30D)</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <DetailSparkline 
-                  data={company.sparkline || []}
+                  data={[]}
                   height={120}
                   showGrid={true}
                   showTooltip={true}

@@ -312,7 +312,7 @@ export default function ScreenerPage() {
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {displayData.filter(d => d.dividendYield && d.dividendYield > 0).length}
+                  {displayData.filter(d => d.dividend_yield && d.dividend_yield > 0).length}
                 </p>
                 <p className="text-sm text-gray-600">Dividend Payers</p>
               </div>

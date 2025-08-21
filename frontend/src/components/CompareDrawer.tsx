@@ -203,7 +203,7 @@ export default function CompareDrawer() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex justify-center">
                             <Sparkline
-                              data={company.sparkline || []}
+                              data={[]}
                               width={80}
                               height={40}
                               color="auto"
