@@ -119,9 +119,9 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                   <Card>
                     <CardContent className="p-3">
                       <div className="text-sm text-muted-foreground">Current Price</div>
-                      <div className="text-lg font-semibold">${company.price.toFixed(2)}</div>
-                      <Badge variant={company.changePct >= 0 ? "default" : "destructive"} className="text-xs">
-                        {company.changePct >= 0 ? '+' : ''}{company.changePct.toFixed(2)}% today
+                      <div className="text-lg font-semibold">${company.current_price.toFixed(2)}</div>
+                      <Badge variant={company.day_change_percent >= 0 ? "default" : "destructive"} className="text-xs">
+                        {company.day_change_percent >= 0 ? '+' : ''}{company.day_change_percent.toFixed(2)}% today
                       </Badge>
                     </CardContent>
                   </Card>
@@ -243,7 +243,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                   </div>
                   <div className="text-center mt-2">
                     <span className="text-sm font-medium text-gray-900">
-                      Current: ${company.price.toFixed(2)}
+                      Current: ${company.current_price.toFixed(2)}
                     </span>
                   </div>
                 </div>

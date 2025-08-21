@@ -78,24 +78,24 @@ export default function ScreenerPage() {
       }
 
       // Price range
-      if (filters.priceMin !== null && company.price < filters.priceMin) return false
-      if (filters.priceMax !== null && company.price > filters.priceMax) return false
+      if (filters.priceMin !== null && company.current_price < filters.priceMin) return false
+      if (filters.priceMax !== null && company.current_price > filters.priceMax) return false
 
       // Market cap range
-      if (filters.marketCapMin !== null && company.marketCap < filters.marketCapMin) return false
-      if (filters.marketCapMax !== null && company.marketCap > filters.marketCapMax) return false
+      if (filters.marketCapMin !== null && company.market_cap < filters.marketCapMin) return false
+      if (filters.marketCapMax !== null && company.market_cap > filters.marketCapMax) return false
 
       // P/E range
-      if (filters.peMin !== null && (company.pe === undefined || company.pe < filters.peMin)) return false
-      if (filters.peMax !== null && (company.pe === undefined || company.pe > filters.peMax)) return false
+      if (filters.peMin !== null && (company.pe_ratio === undefined || company.pe_ratio < filters.peMin)) return false
+      if (filters.peMax !== null && (company.pe_ratio === undefined || company.pe_ratio > filters.peMax)) return false
 
       // Beta range
       if (filters.betaMin !== null && (company.beta === undefined || company.beta < filters.betaMin)) return false
       if (filters.betaMax !== null && (company.beta === undefined || company.beta > filters.betaMax)) return false
 
       // Boolean filters
-      if (filters.profitable && (company.netMarginTTM === undefined || company.netMarginTTM <= 0)) return false
-      if (filters.dividendPayers && (company.dividendYield === undefined || company.dividendYield <= 0)) return false
+      if (filters.profitable && (company.net_margin === undefined || company.net_margin <= 0)) return false
+      if (filters.dividendPayers && (company.dividend_yield === undefined || company.dividend_yield <= 0)) return false
       if (filters.lowVolatility && (company.beta === undefined || company.beta >= 1)) return false
 
       return true
