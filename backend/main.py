@@ -403,6 +403,75 @@ async def get_screener_data(
         }
     }
 
+# FMP API endpoints for DCF
+@app.get("/api/fmp/dcf-data")
+async def get_fmp_dcf_data(symbol: str):
+    """Get aggregated DCF data from FMP API"""
+    import os
+    import requests
+    
+    fmp_api_key = os.getenv('FMP_API_KEY', 'demo')
+    base_url = "https://financialmodelingprep.com/api/v3"
+    
+    try:
+        # Aggregate all required data
+        endpoints = {
+            'profile': f"{base_url}/profile/{symbol}?apikey={fmp_api_key}",
+            'financials': f"{base_url}/income-statement/{symbol}?limit=10&apikey={fmp_api_key}",
+            'balance_sheet': f"{base_url}/balance-sheet-statement/{symbol}?limit=10&apikey={fmp_api_key}",
+            'cash_flow': f"{base_url}/cash-flow-statement/{symbol}?limit=10&apikey={fmp_api_key}",
+            'ratios': f"{base_url}/ratios/{symbol}?limit=10&apikey={fmp_api_key}",
+            'metrics': f"{base_url}/key-metrics/{symbol}?limit=10&apikey={fmp_api_key}",
+            'prices': f"{base_url}/historical-price-full/{symbol}?from=2020-01-01&apikey={fmp_api_key}",
+            'enterprise_values': f"{base_url}/enterprise-values/{symbol}?limit=10&apikey={fmp_api_key}"
+        }
+        
+        # Fetch all data
+        results = {}
+        for key, url in endpoints.items():
+            try:
+                response = requests.get(url, timeout=10)
+                if response.status_code == 200:
+                    data = response.json()
+                    results[key] = data
+                else:
+                    results[key] = []
+            except Exception as e:
+                print(f"Error fetching {key}: {e}")
+                results[key] = []
+        
+        # Transform to expected format
+        dcf_data = {
+            'company': {
+                'symbol': symbol,
+                'name': results['profile'][0].get('companyName', symbol) if results['profile'] else symbol,
+                'sector': results['profile'][0].get('sector', 'Unknown') if results['profile'] else 'Unknown',
+                'industry': results['profile'][0].get('industry', 'Unknown') if results['profile'] else 'Unknown',
+                'country': results['profile'][0].get('country', 'US') if results['profile'] else 'US',
+                'currency': results['profile'][0].get('currency', 'USD') if results['profile'] else 'USD',
+                'sharesOutstanding': results['profile'][0].get('mktCap', 0) / results.get('prices', {}).get('historical', [{}])[0].get('close', 1) if results['profile'] and results.get('prices', {}).get('historical') else 0,
+                'dilutedShares': results['profile'][0].get('mktCap', 0) / results.get('prices', {}).get('historical', [{}])[0].get('close', 1) if results['profile'] and results.get('prices', {}).get('historical') else 0
+            },
+            'historical': results['financials'][:5] if results['financials'] else [],
+            'market': {
+                'currentPrice': results.get('prices', {}).get('historical', [{}])[0].get('close', 0) if results.get('prices', {}).get('historical') else 0,
+                'marketCap': results['profile'][0].get('mktCap', 0) if results['profile'] else 0,
+                'enterpriseValue': results['enterprise_values'][0].get('enterpriseValue', 0) if results['enterprise_values'] else 0,
+                'beta': results['profile'][0].get('beta', 1.0) if results['profile'] else 1.0,
+                'riskFreeRate': 0.045,  # 4.5% default
+                'equityRiskPremium': 0.06,  # 6% default
+                'currency': 'USD',
+                'lastUpdated': '2024-01-01'
+            },
+            'priceHistory': results.get('prices', {}).get('historical', [])[-252:] if results.get('prices', {}).get('historical') else [],  # Last 252 trading days
+            'sparkline': [p.get('close', 0) for p in results.get('prices', {}).get('historical', [])[-30:]] if results.get('prices', {}).get('historical') else []  # Last 30 days
+        }
+        
+        return dcf_data
+        
+    except Exception as e:
+        return {"error": f"Failed to fetch DCF data: {str(e)}"}
+
 @app.get("/api/sp500/companies")
 async def get_sp500_companies_paginated(
     page: int = 1, 
