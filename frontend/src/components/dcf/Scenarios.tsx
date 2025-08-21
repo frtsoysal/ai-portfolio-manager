@@ -249,7 +249,7 @@ export default function ScenariosPanel({
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-0.5 bg-gray-400"></div>
                       <span className="text-sm text-muted-foreground">
-                        Current Price: {formatCurrency(dcfData.market.currentPrice)}
+                        Current Price: {formatCurrency(dcfData.market?.currentPrice || 0)}
                       </span>
                       <div className="w-4 h-0.5 bg-gray-400"></div>
                     </div>

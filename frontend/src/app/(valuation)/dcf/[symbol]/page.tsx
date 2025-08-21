@@ -182,37 +182,37 @@ export default function DCFAnalysisPage() {
             {/* Valuation Summary */}
             <ValuationCard 
               valuation={dcfModel?.valuation}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Forecast Charts */}
             <ForecastCharts 
               projections={dcfModel?.projections || []}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Forecast Table */}
             <ForecastTable 
               projections={dcfModel?.projections || []}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Terminal Value Analysis */}
             <TerminalValueCard 
               model={dcfModel}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Valuation Bridge */}
             <ValuationBridge 
               model={dcfModel}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Multiples Analysis */}
             <MultiplesAnalysis 
               model={dcfModel}
-              currency={dcfData.market.currency}
+              currency={dcfData.market?.currency || 'USD'}
             />
 
             {/* Analysis Tabs */}

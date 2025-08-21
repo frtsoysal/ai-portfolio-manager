@@ -37,7 +37,7 @@ export default function ReverseDCF({ model, dcfData }: ReverseDCFProps) {
       setReverseAnalysis(analysis)
       
       // Run what-if analysis for different price targets
-      const currentPrice = dcfData.market.currentPrice
+      const currentPrice = dcfData.market?.currentPrice || 0
       const priceTargets = [
         currentPrice * 0.8,  // -20%
         currentPrice * 0.9,  // -10%
@@ -300,9 +300,9 @@ export default function ReverseDCF({ model, dcfData }: ReverseDCFProps) {
                             {formatCurrency(scenario.targetPrice)}
                           </td>
                           <td className={`text-right py-3 px-2 ${
-                            scenario.targetPrice > dcfData.market.currentPrice ? 'text-green-600' : 'text-red-600'
+                            scenario.targetPrice > (dcfData.market?.currentPrice || 0) ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {formatPercent((scenario.targetPrice - dcfData.market.currentPrice) / dcfData.market.currentPrice)}
+                            {formatPercent((scenario.targetPrice - (dcfData.market?.currentPrice || 0)) / (dcfData.market?.currentPrice || 1))}
                           </td>
                           <td className="text-right py-3 px-2">
                             {formatPercent(scenario.requiredAssumptions.terminalGrowth)}

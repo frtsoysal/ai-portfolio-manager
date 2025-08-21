@@ -391,9 +391,9 @@ export const buildDefaultInputs = (
   )
   
   // WACC components
-  const riskFreeRate = dcfData.market.riskFreeRate || 0.0382 // 10-year Treasury yield
-  const equityRiskPremium = dcfData.market.equityRiskPremium || 0.0472 // Equity risk premium
-  const beta = dcfData.market.beta || 1.0 // Stock beta
+  const riskFreeRate = dcfData.market?.riskFreeRate || 0.0382 // 10-year Treasury yield
+  const equityRiskPremium = dcfData.market?.equityRiskPremium || 0.0472 // Equity risk premium
+  const beta = dcfData.market?.beta || 1.0 // Stock beta
   
   // Use median tax rate from historical data or default to 25%
   const taxRate = metrics.effectiveTaxRates.length > 0 

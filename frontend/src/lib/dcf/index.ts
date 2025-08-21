@@ -41,7 +41,7 @@ export const runDCFModel = (
     historicalProjections,
     forecastProjections,
     inputs,
-    dcfData.market.currentPrice,
+    dcfData.market?.currentPrice || 0,
     dcfData.company.dilutedShares,
     dcfData.historical[0] // Latest historical (assuming sorted with most recent first)
   )
@@ -132,7 +132,7 @@ export const runScenario = (
     historicalProjections,
     forecastProjections,
     inputs,
-    dcfData.market.currentPrice,
+    dcfData.market?.currentPrice || 0,
     dcfData.company.dilutedShares,
     dcfData.historical[0] // Latest historical (assuming sorted with most recent first)
   )
