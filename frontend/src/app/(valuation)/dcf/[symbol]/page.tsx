@@ -50,8 +50,8 @@ export default function DCFAnalysisPage() {
       setLoading(true)
       setError('')
 
-      // Fetch DCF data from our API endpoint
-      const response = await fetch(`/api/dcf?symbol=${ticker}`)
+      // Fetch DCF data from our proxy endpoint
+      const response = await fetch(`/api/backend/dcf/${ticker}`)
       if (!response.ok) {
         throw new Error(`Failed to fetch data for ${ticker}`)
       }

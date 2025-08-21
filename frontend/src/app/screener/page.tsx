@@ -30,7 +30,7 @@ export default function ScreenerPage() {
   const fetchData = async (refresh = false) => {
     try {
       setLoading(true)
-      const url = `/api/screener${refresh ? '?refresh=1' : ''}`
+      const url = `/api/backend/screener${refresh ? '?refresh=1' : ''}`
       const response = await fetch(url)
       
       if (!response.ok) {
