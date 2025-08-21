@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Symbol is required' }, { status: 400 })
     }
 
-    const backendUrl = process.env.BACKEND_URL || 'https://ai-portfolio-manager-krrs.onrender.com'
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://ai-portfolio-manager-krrs.onrender.com'
     
     const response = await fetch(`${backendUrl}/api/fmp/dcf-data?symbol=${symbol}`, {
       method: 'GET',

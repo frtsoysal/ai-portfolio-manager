@@ -53,8 +53,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch fresh data from our backend
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8001'
-    const response = await fetch(`${backendUrl}/api/sp500/overview`, {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'https://ai-portfolio-manager-krrs.onrender.com'
+    const response = await fetch(`${backendUrl}/api/screener`, {
       headers: {
         'Cache-Control': 'no-cache'
       }
@@ -66,8 +66,13 @@ export async function GET(request: NextRequest) {
 
     const backendData = await response.json()
     
+    // Check if backend returned an error
+    if (backendData.error) {
+      throw new Error(`Backend data error: ${backendData.error}`)
+    }
+    
     // Transform backend data to screener format
-    const screenerData: ScreenerRow[] = backendData.companies.map((company: any) => {
+    const screenerData: ScreenerRow[] = (backendData.companies || []).map((company: any) => {
       // Calculate 52-week position if we have the data
       let week52Position: number | undefined
       if (company.week52_high && company.week52_low && company.current_price) {
