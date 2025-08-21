@@ -351,16 +351,16 @@ export default function ScenariosPanel({
                           <td className="py-2 px-3 font-medium">WACC</td>
                           {scenarios.map(scenario => {
                             const wacc = scenario.name === 'Base Case' 
-                              ? (model?.inputs.wacc || 0) * 100
+                              ? (model?.results?.wacc || 0) * 100
                               : scenario.name === 'Bull Case' 
-                                ? ((model?.inputs.wacc || 0) - 0.005) * 100
+                                ? ((model?.results?.wacc || 0) - 0.005) * 100
                                 : scenario.name === 'Bear Case'
-                                  ? ((model?.inputs.wacc || 0) + 0.005) * 100
+                                  ? ((model?.results?.wacc || 0) + 0.005) * 100
                                   : scenario.name === 'High Growth'
-                                    ? ((model?.inputs.wacc || 0) - 0.01) * 100
+                                    ? ((model?.results?.wacc || 0) - 0.01) * 100
                                     : scenario.name === 'Recession'
-                                      ? ((model?.inputs.wacc || 0) + 0.01) * 100
-                                      : (model?.inputs.wacc || 0) * 100
+                                      ? ((model?.results?.wacc || 0) + 0.01) * 100
+                                      : (model?.results?.wacc || 0) * 100
                             return (
                               <td key={scenario.name} className="text-center py-2 px-3">
                                 {wacc.toFixed(1)}%
