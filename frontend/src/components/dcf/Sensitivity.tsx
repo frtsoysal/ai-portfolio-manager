@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DCFModel, DCFData } from '@/types/dcf'
+import { DCFModel, DCFData, DCFInputs } from '@/types/dcf'
 import { runSensitivityAnalysis, calculateTornadoChart, runMonteCarloSimulation } from '@/lib/dcf/scenarios'
 import { Activity, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react'
 
