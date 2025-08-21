@@ -142,23 +142,23 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/E Ratio</span>
-                  <span className="font-medium">{formatNumber(company.pe, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.pe_ratio, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Forward P/E</span>
-                  <span className="font-medium">{formatNumber(company.forwardPE, 1)}</span>
+                  <span className="font-medium">N/A</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/B Ratio</span>
-                  <span className="font-medium">{formatNumber(company.pb, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.pb_ratio, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/S Ratio</span>
-                  <span className="font-medium">{formatNumber(company.ps, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.ps_ratio, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">EV/EBITDA</span>
-                  <span className="font-medium">{formatNumber(company.evEbitda, 1)}</span>
+                  <span className="font-medium">N/A</span>
                 </div>
               </div>
             </div>
@@ -169,19 +169,19 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">ROE</span>
-                  <span className="font-medium">{formatPercent(company.roeTTM)}</span>
+                  <span className="font-medium">{formatPercent(company.roe)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">ROA</span>
-                  <span className="font-medium">{formatPercent(company.roaTTM)}</span>
+                  <span className="font-medium">{formatPercent(company.roa)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Net Margin</span>
-                  <span className="font-medium">{formatPercent(company.netMarginTTM)}</span>
+                  <span className="font-medium">{formatPercent(company.net_margin)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Revenue Growth</span>
-                  <span className="font-medium">{formatPercent(company.revenueGrowthTTM)}</span>
+                  <span className="font-medium">{formatPercent(company.revenue_growth_ttm)}</span>
                 </div>
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Dividend Yield</span>
-                  <span className="font-medium">{formatPercent(company.dividendYield)}</span>
+                  <span className="font-medium">{formatPercent(company.dividend_yield)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">52-Week Position</span>

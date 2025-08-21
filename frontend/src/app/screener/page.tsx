@@ -283,7 +283,7 @@ export default function ScreenerPage() {
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
                   {displayData.length > 0 ? 
-                    (displayData.filter(d => d.pe).reduce((a, b, _, arr) => a + (b.pe || 0), 0) / displayData.filter(d => d.pe).length || 0).toFixed(1) : '0'
+                    (displayData.filter(d => d.pe_ratio).reduce((a, b, _, arr) => a + (b.pe_ratio || 0), 0) / displayData.filter(d => d.pe_ratio).length || 0).toFixed(1) : '0'
                   }
                 </p>
                 <p className="text-sm text-gray-600">Avg P/E</p>

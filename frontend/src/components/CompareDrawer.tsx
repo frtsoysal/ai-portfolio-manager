@@ -182,22 +182,22 @@ export default function CompareDrawer() {
                             {formatNumber(company.pe_ratio, 1)}
                           </div>
                           <div className="text-xs text-gray-500">
-                            Fwd: {formatNumber(company.forwardPE, 1)}
+                            Fwd: N/A
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.dividendYield)}`}>
-                            {formatPercent(company.dividendYield)}
+                          <div className={`text-sm font-medium ${getColorClass(company.dividend_yield)}`}>
+                            {formatPercent(company.dividend_yield)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.roeTTM)}`}>
-                            {formatPercent(company.roeTTM)}
+                          <div className={`text-sm font-medium ${getColorClass(company.roe)}`}>
+                            {formatPercent(company.roe)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.netMarginTTM)}`}>
-                            {formatPercent(company.netMarginTTM)}
+                          <div className={`text-sm font-medium ${getColorClass(company.net_margin)}`}>
+                            {formatPercent(company.net_margin)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
