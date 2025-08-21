@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { ScreenerRow } from '../api/screener/route'
+import { ScreenerRow } from '../../types/screener'
 import FilterPanel, { initialFilters } from '../../components/FilterPanel'
 import DataTable from '../../components/DataTable'
 import CompanyDetailDrawer from '../../components/CompanyDetailDrawer'
