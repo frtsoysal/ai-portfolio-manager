@@ -298,7 +298,7 @@ export default function ScreenerPage() {
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatMarketCap(displayData.reduce((sum, company) => sum + company.marketCap, 0))}
+                  {formatMarketCap(displayData.reduce((sum, company) => sum + company.market_cap, 0))}
                 </p>
                 <p className="text-sm text-gray-600">Total Market Cap</p>
               </div>

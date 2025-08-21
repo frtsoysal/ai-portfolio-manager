@@ -128,7 +128,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                   <Card>
                     <CardContent className="p-3">
                       <div className="text-sm text-muted-foreground">Market Cap</div>
-                      <div className="text-lg font-semibold">{formatMarketCap(company.marketCap)}</div>
+                      <div className="text-lg font-semibold">{formatMarketCap(company.market_cap)}</div>
                       <Badge variant="secondary" className="text-xs">{company.sector}</Badge>
                     </CardContent>
                   </Card>
