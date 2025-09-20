@@ -327,7 +327,7 @@ export const runReverseDCFAnalysis = (
     overallFeasibility: 'High' | 'Medium' | 'Low'
   }
 } => {
-  const currentPrice = targetPrice || dcfData.market?.currentPrice || 0
+  const currentPrice = targetPrice || dcfData.market.currentPrice
   const currentModel = runDCFModel(dcfData, baseInputs)
   
   // Calculate all implied assumptions
@@ -437,7 +437,7 @@ export const runWhatIfAnalysis = (
     
     let recommendation = ''
     if (analysis.feasibilityAssessment.overallFeasibility === 'High') {
-      recommendation = targetPrice > (dcfData.market?.currentPrice || 0) ? 'Achievable upside' : 'Fair value'
+      recommendation = targetPrice > dcfData.market.currentPrice ? 'Achievable upside' : 'Fair value'
     } else if (analysis.feasibilityAssessment.overallFeasibility === 'Medium') {
       recommendation = 'Requires optimistic assumptions'
     } else {

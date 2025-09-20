@@ -39,7 +39,7 @@ export default function SP500Dashboard() {
 
   const fetchSP500Data = async () => {
     try {
-      const response = await fetch('/api/backend/sp500')
+      const response = await fetch('/api/sp500')
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }

@@ -1,6 +1,6 @@
 'use client'
 
-import { ScreenerRow } from '../types/screener'
+import { ScreenerRow } from '../app/api/screener/route'
 import { Button } from './ui/button'
 
 interface ExportButtonProps {

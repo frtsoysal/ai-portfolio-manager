@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { DCFModel, DCFData, DCFInputs } from '@/types/dcf'
+import { DCFModel, DCFData } from '@/types/dcf'
 import { runSensitivityAnalysis, calculateTornadoChart, runMonteCarloSimulation } from '@/lib/dcf/scenarios'
 import { Activity, BarChart3, TrendingUp, AlertTriangle } from 'lucide-react'
 
@@ -25,11 +25,12 @@ export default function SensitivityPanel({ model, dcfData, onModelChange, active
     if (model && dcfData) {
       // Calculate tornado chart data
       const parameters = [
-        { name: 'terminalGrowthRate' as keyof DCFInputs, label: 'Terminal Growth Rate', variation: 0.2 },
-        { name: 'revenueGrowthRates' as keyof DCFInputs, label: 'Revenue Growth (Y1)', variation: 0.25 },
-        { name: 'operatingMargins' as keyof DCFInputs, label: 'Operating Margin', variation: 0.15 },
-        { name: 'taxRate' as keyof DCFInputs, label: 'Tax Rate', variation: 0.1 },
-        { name: 'capexPercent' as keyof DCFInputs, label: 'CapEx % Revenue', variation: 0.2 }
+        { name: 'terminalGrowthRate', label: 'Terminal Growth Rate', variation: 0.2 },
+        { name: 'wacc', label: 'WACC', variation: 0.15 },
+        { name: 'revenueGrowthRates', label: 'Revenue Growth (Y1)', variation: 0.25 },
+        { name: 'operatingMargins', label: 'Operating Margin', variation: 0.15 },
+        { name: 'taxRate', label: 'Tax Rate', variation: 0.1 },
+        { name: 'capexPercent', label: 'CapEx % Revenue', variation: 0.2 }
       ]
       
       try {
@@ -309,21 +310,21 @@ export default function SensitivityPanel({ model, dcfData, onModelChange, active
                 <div className="grid grid-cols-3 gap-4">
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-sm text-muted-foreground">Prob. &gt; Current</div>
+                      <div className="text-sm text-muted-foreground">Prob. > Current</div>
                       <div className="text-2xl font-bold text-green-600">68%</div>
                     </CardContent>
                   </Card>
                   
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-sm text-muted-foreground">Prob. &gt; +10%</div>
+                      <div className="text-sm text-muted-foreground">Prob. > +10%</div>
                       <div className="text-2xl font-bold text-blue-600">45%</div>
                     </CardContent>
                   </Card>
                   
                   <Card>
                     <CardContent className="p-4 text-center">
-                      <div className="text-sm text-muted-foreground">Prob. &gt; +20%</div>
+                      <div className="text-sm text-muted-foreground">Prob. > +20%</div>
                       <div className="text-2xl font-bold text-purple-600">28%</div>
                     </CardContent>
                   </Card>

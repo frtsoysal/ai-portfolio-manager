@@ -14,13 +14,6 @@ interface DCFHeaderProps {
 
 export default function DCFHeader({ company, market, valuation }: DCFHeaderProps) {
   const formatCurrency = (value: number, currency = 'USD') => {
-    if (!value || isNaN(value)) return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(0)
-    
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency,

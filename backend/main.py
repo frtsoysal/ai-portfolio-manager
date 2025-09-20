@@ -4,6 +4,8 @@ from services.portfolio_service import portfolio_service
 from services.market_data_service import market_data_service
 from services.sp500_data_service import sp500_service
 import logging
+import json
+from datetime import datetime
 
 # Logging ayarları
 logging.basicConfig(level=logging.INFO)
@@ -22,8 +24,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://localhost:3001",
-        "https://ai-portfolio-manager-ashen.vercel.app",
-        "https://ai-portfolio-manager-six.vercel.app"
+        "https://ai-portfolio-manager-ashen.vercel.app"
     ],  # Frontend URL'leri
     allow_credentials=True,
     allow_methods=["*"],
@@ -44,6 +45,11 @@ async def health_check():
 @app.get("/api/test")
 async def test():
     return {"message": "Test başarılı!"}
+
+# Test SP500 endpoint
+@app.get("/api/sp500/test")
+async def test_sp500():
+    return {"message": "SP500 test başarılı!", "companies": 5}
 
 # Portfolio endpoints
 @app.get("/api/portfolios")
@@ -264,254 +270,11 @@ async def get_stock_analysis(symbol: str):
         logger.error(f"Error fetching analysis for {symbol}: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
+# Overview endpoint kaldırıldı - artık sadece screener kullanıyoruz
+
+# Diğer SP500 endpoint'leri geçici olarak kaldırıldı - sadece overview çalışıyor
+
 # Uygulama çalıştırma
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001, reload=False)
-
-# S&P 500 Dashboard Endpoints
-from services.sp500_dashboard_service import get_dashboard_service
-
-@app.get("/api/sp500/overview")
-async def get_sp500_overview():
-    """Get overview of all S&P 500 companies"""
-    dashboard = get_dashboard_service()
-    return dashboard.get_companies_overview()
-
-@app.get("/api/sp500/company/{symbol}")
-async def get_company_details(symbol: str):
-    """Get detailed company information"""
-    dashboard = get_dashboard_service()
-    return dashboard.get_company_details(symbol.upper())
-
-@app.get("/api/sp500/sectors")
-async def get_sector_analysis():
-    """Get sector-wise analysis"""
-    dashboard = get_dashboard_service()
-    return dashboard.get_sector_analysis()
-
-@app.get("/api/sp500/top/{metric}")
-async def get_top_performers(metric: str, limit: int = 20):
-    """Get top performers by metric (market_cap, roe, low_pe, high_margin)"""
-    dashboard = get_dashboard_service()
-    return dashboard.get_top_performers(metric, limit)
-
-@app.get("/api/sp500/search")
-async def search_companies(q: str):
-    """Search companies by symbol or name"""
-    dashboard = get_dashboard_service()
-    return dashboard.search_companies(q)
-
-@app.get("/api/sp500/summary")
-async def get_sp500_summary():
-    """Get S&P 500 summary statistics only (fast endpoint)"""
-    dashboard = get_dashboard_service()
-    overview = dashboard.get_companies_overview()
-    
-    if 'error' in overview:
-        return overview
-    
-    # Return only summary statistics
-    companies = overview['companies']
-    
-    summary = {
-        'total_companies': len(companies),
-        'collection_date': overview['collection_date'],
-        'stats': {
-            'mega_caps': len([c for c in companies if c['market_cap'] >= 1e12]),
-            'large_caps': len([c for c in companies if 1e11 <= c['market_cap'] < 1e12]),
-            'total_market_cap': sum(c['market_cap'] for c in companies),
-            'avg_pe': sum(c['pe_ratio'] for c in companies if c['pe_ratio'] and 0 < c['pe_ratio'] < 100) / 
-                     len([c for c in companies if c['pe_ratio'] and 0 < c['pe_ratio'] < 100]),
-            'top_5_companies': [
-                {
-                    'symbol': c['symbol'],
-                    'company_name': c['company_name'],
-                    'market_cap': c['market_cap'],
-                    'sector': c['sector']
-                }
-                for c in companies[:5]
-            ]
-        }
-    }
-    
-    return summary
-
-# Screener endpoint
-@app.get("/api/screener")
-async def get_screener_data(
-    sector: str = None,
-    min_market_cap: float = None,
-    max_market_cap: float = None,
-    min_pe: float = None,
-    max_pe: float = None,
-    min_dividend: float = None,
-    page: int = 1,
-    limit: int = 50
-):
-    """Stock screener with filtering capabilities"""
-    dashboard = get_dashboard_service()
-    overview = dashboard.get_companies_overview()
-    
-    if 'error' in overview:
-        return overview
-    
-    companies = overview['companies']
-    
-    # Apply filters
-    filtered_companies = companies
-    
-    if sector:
-        filtered_companies = [c for c in filtered_companies if c.get('sector', '').lower() == sector.lower()]
-    
-    if min_market_cap is not None:
-        filtered_companies = [c for c in filtered_companies if c.get('market_cap', 0) >= min_market_cap]
-    
-    if max_market_cap is not None:
-        filtered_companies = [c for c in filtered_companies if c.get('market_cap', 0) <= max_market_cap]
-    
-    if min_pe is not None:
-        filtered_companies = [c for c in filtered_companies if c.get('pe_ratio') and c['pe_ratio'] >= min_pe]
-    
-    if max_pe is not None:
-        filtered_companies = [c for c in filtered_companies if c.get('pe_ratio') and c['pe_ratio'] <= max_pe]
-    
-    if min_dividend is not None:
-        filtered_companies = [c for c in filtered_companies if c.get('dividend_yield', 0) >= min_dividend]
-    
-    # Pagination
-    total = len(filtered_companies)
-    start = (page - 1) * limit
-    end = start + limit
-    paginated_companies = filtered_companies[start:end]
-    
-    return {
-        'companies': paginated_companies,
-        'pagination': {
-            'page': page,
-            'limit': limit,
-            'total': total,
-            'pages': (total + limit - 1) // limit
-        },
-        'filters_applied': {
-            'sector': sector,
-            'min_market_cap': min_market_cap,
-            'max_market_cap': max_market_cap,
-            'min_pe': min_pe,
-            'max_pe': max_pe,
-            'min_dividend': min_dividend
-        }
-    }
-
-# FMP API endpoints for DCF
-@app.get("/api/fmp/dcf-data")
-async def get_fmp_dcf_data(symbol: str):
-    """Get aggregated DCF data from FMP API"""
-    import os
-    import requests
-    
-    fmp_api_key = os.getenv('FMP_API_KEY', 'demo')
-    base_url = "https://financialmodelingprep.com/api/v3"
-    
-    try:
-        # Aggregate all required data
-        endpoints = {
-            'profile': f"{base_url}/profile/{symbol}?apikey={fmp_api_key}",
-            'financials': f"{base_url}/income-statement/{symbol}?limit=10&apikey={fmp_api_key}",
-            'balance_sheet': f"{base_url}/balance-sheet-statement/{symbol}?limit=10&apikey={fmp_api_key}",
-            'cash_flow': f"{base_url}/cash-flow-statement/{symbol}?limit=10&apikey={fmp_api_key}",
-            'ratios': f"{base_url}/ratios/{symbol}?limit=10&apikey={fmp_api_key}",
-            'metrics': f"{base_url}/key-metrics/{symbol}?limit=10&apikey={fmp_api_key}",
-            'prices': f"{base_url}/historical-price-full/{symbol}?from=2020-01-01&apikey={fmp_api_key}",
-            'enterprise_values': f"{base_url}/enterprise-values/{symbol}?limit=10&apikey={fmp_api_key}"
-        }
-        
-        # Fetch all data
-        results = {}
-        for key, url in endpoints.items():
-            try:
-                response = requests.get(url, timeout=10)
-                if response.status_code == 200:
-                    data = response.json()
-                    results[key] = data
-                else:
-                    results[key] = []
-            except Exception as e:
-                print(f"Error fetching {key}: {e}")
-                results[key] = []
-        
-        # Transform to expected format
-        dcf_data = {
-            'company': {
-                'symbol': symbol,
-                'name': results['profile'][0].get('companyName', symbol) if results['profile'] else symbol,
-                'sector': results['profile'][0].get('sector', 'Unknown') if results['profile'] else 'Unknown',
-                'industry': results['profile'][0].get('industry', 'Unknown') if results['profile'] else 'Unknown',
-                'country': results['profile'][0].get('country', 'US') if results['profile'] else 'US',
-                'currency': results['profile'][0].get('currency', 'USD') if results['profile'] else 'USD',
-                'sharesOutstanding': results['profile'][0].get('mktCap', 0) / results.get('prices', {}).get('historical', [{}])[0].get('close', 1) if results['profile'] and results.get('prices', {}).get('historical') else 0,
-                'dilutedShares': results['profile'][0].get('mktCap', 0) / results.get('prices', {}).get('historical', [{}])[0].get('close', 1) if results['profile'] and results.get('prices', {}).get('historical') else 0
-            },
-            'historical': results['financials'][:5] if results['financials'] else [],
-            'market': {
-                'currentPrice': results.get('prices', {}).get('historical', [{}])[0].get('close', 0) if results.get('prices', {}).get('historical') else 0,
-                'marketCap': results['profile'][0].get('mktCap', 0) if results['profile'] else 0,
-                'enterpriseValue': results['enterprise_values'][0].get('enterpriseValue', 0) if results['enterprise_values'] else 0,
-                'beta': results['profile'][0].get('beta', 1.0) if results['profile'] else 1.0,
-                'riskFreeRate': 0.045,  # 4.5% default
-                'equityRiskPremium': 0.06,  # 6% default
-                'currency': 'USD',
-                'lastUpdated': '2024-01-01'
-            },
-            'priceHistory': results.get('prices', {}).get('historical', [])[-252:] if results.get('prices', {}).get('historical') else [],  # Last 252 trading days
-            'sparkline': [p.get('close', 0) for p in results.get('prices', {}).get('historical', [])[-30:]] if results.get('prices', {}).get('historical') else []  # Last 30 days
-        }
-        
-        return dcf_data
-        
-    except Exception as e:
-        return {"error": f"Failed to fetch DCF data: {str(e)}"}
-
-@app.get("/api/sp500/companies")
-async def get_sp500_companies_paginated(
-    page: int = 1, 
-    limit: int = 50, 
-    sector: str = None, 
-    search: str = None
-):
-    """Get paginated S&P 500 companies"""
-    dashboard = get_dashboard_service()
-    overview = dashboard.get_companies_overview()
-    
-    if 'error' in overview:
-        return overview
-    
-    companies = overview['companies']
-    
-    # Apply filters
-    if sector and sector != 'All':
-        companies = [c for c in companies if c['sector'] == sector]
-    
-    if search:
-        companies = [c for c in companies 
-                    if search.lower() in c['symbol'].lower() or 
-                       search.lower() in c['company_name'].lower()]
-    
-    # Pagination
-    start = (page - 1) * limit
-    end = start + limit
-    paginated_companies = companies[start:end]
-    
-    return {
-        'companies': paginated_companies,
-        'pagination': {
-            'page': page,
-            'limit': limit,
-            'total': len(companies),
-            'pages': (len(companies) + limit - 1) // limit
-        },
-        'filters': {
-            'sector': sector,
-            'search': search
-        }
-    }

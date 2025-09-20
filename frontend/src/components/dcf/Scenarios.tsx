@@ -249,7 +249,7 @@ export default function ScenariosPanel({
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-0.5 bg-gray-400"></div>
                       <span className="text-sm text-muted-foreground">
-                        Current Price: {formatCurrency(dcfData.market?.currentPrice || 0)}
+                        Current Price: {formatCurrency(dcfData.market.currentPrice)}
                       </span>
                       <div className="w-4 h-0.5 bg-gray-400"></div>
                     </div>
@@ -309,16 +309,16 @@ export default function ScenariosPanel({
                           <td className="py-2 px-3 font-medium">EBITDA Margin</td>
                           {scenarios.map(scenario => {
                             const margin = scenario.name === 'Base Case' 
-                              ? (model?.inputs.operatingMargins?.[0] || 0) * 100
+                              ? (model?.inputs.ebitdaMargins?.[0] || 0) * 100
                               : scenario.name === 'Bull Case' 
-                                ? ((model?.inputs.operatingMargins?.[0] || 0) * 1.2) * 100
+                                ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 1.2) * 100
                                 : scenario.name === 'Bear Case'
-                                  ? ((model?.inputs.operatingMargins?.[0] || 0) * 0.8) * 100
+                                  ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 0.8) * 100
                                   : scenario.name === 'High Growth'
-                                    ? ((model?.inputs.operatingMargins?.[0] || 0) * 1.1) * 100
+                                    ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 1.1) * 100
                                     : scenario.name === 'Recession'
-                                      ? ((model?.inputs.operatingMargins?.[0] || 0) * 0.7) * 100
-                                      : (model?.inputs.operatingMargins?.[0] || 0) * 100
+                                      ? ((model?.inputs.ebitdaMargins?.[0] || 0) * 0.7) * 100
+                                      : (model?.inputs.ebitdaMargins?.[0] || 0) * 100
                             return (
                               <td key={scenario.name} className="text-center py-2 px-3">
                                 {margin.toFixed(1)}%
@@ -351,16 +351,16 @@ export default function ScenariosPanel({
                           <td className="py-2 px-3 font-medium">WACC</td>
                           {scenarios.map(scenario => {
                             const wacc = scenario.name === 'Base Case' 
-                              ? (model?.valuation?.wacc || 0) * 100
+                              ? (model?.inputs.wacc || 0) * 100
                               : scenario.name === 'Bull Case' 
-                                ? ((model?.valuation?.wacc || 0) - 0.005) * 100
+                                ? ((model?.inputs.wacc || 0) - 0.005) * 100
                                 : scenario.name === 'Bear Case'
-                                  ? ((model?.valuation?.wacc || 0) + 0.005) * 100
+                                  ? ((model?.inputs.wacc || 0) + 0.005) * 100
                                   : scenario.name === 'High Growth'
-                                    ? ((model?.valuation?.wacc || 0) - 0.01) * 100
+                                    ? ((model?.inputs.wacc || 0) - 0.01) * 100
                                     : scenario.name === 'Recession'
-                                      ? ((model?.valuation?.wacc || 0) + 0.01) * 100
-                                      : (model?.valuation?.wacc || 0) * 100
+                                      ? ((model?.inputs.wacc || 0) + 0.01) * 100
+                                      : (model?.inputs.wacc || 0) * 100
                             return (
                               <td key={scenario.name} className="text-center py-2 px-3">
                                 {wacc.toFixed(1)}%

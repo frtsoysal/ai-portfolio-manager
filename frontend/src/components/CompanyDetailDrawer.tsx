@@ -1,6 +1,6 @@
 'use client'
 
-import { ScreenerRow } from '../types/screener'
+import { ScreenerRow } from '../app/api/screener/route'
 import { DetailSparkline } from './Sparkline'
 import { useCompare } from './CompareContext'
 import { Button } from './ui/button'
@@ -38,7 +38,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
   }
 
   // Get logo from Clearbit or use placeholder
-  const logoUrl = `https://logo.clearbit.com/${company.company_name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
+  const logoUrl = `https://logo.clearbit.com/${company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`
   const fallbackLogo = `https://ui-avatars.com/api/?name=${company.symbol}&size=64&background=3B82F6&color=ffffff&format=svg`
 
   // Calculate 52-week position color
@@ -61,11 +61,6 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
   }
 
   const riskLevel = getRiskLevel(company.beta)
-  
-  // Calculate 52-week position
-  const week52Position = company.week52_high && company.week52_low && company.week52_high !== company.week52_low
-    ? (company.current_price - company.week52_low) / (company.week52_high - company.week52_low)
-    : null
 
   return (
     <>
@@ -89,7 +84,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
                     src={logoUrl}
-                    alt={company.company_name}
+                    alt={company.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = fallbackLogo
@@ -98,7 +93,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">{company.symbol}</h2>
-                  <p className="text-sm text-gray-600 truncate max-w-48">{company.company_name}</p>
+                  <p className="text-sm text-gray-600 truncate max-w-48">{company.name}</p>
                 </div>
               </div>
               <button
@@ -124,16 +119,16 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                   <Card>
                     <CardContent className="p-3">
                       <div className="text-sm text-muted-foreground">Current Price</div>
-                      <div className="text-lg font-semibold">${company.current_price.toFixed(2)}</div>
-                      <Badge variant={company.day_change_percent >= 0 ? "default" : "destructive"} className="text-xs">
-                        {company.day_change_percent >= 0 ? '+' : ''}{company.day_change_percent.toFixed(2)}% today
+                      <div className="text-lg font-semibold">${company.price.toFixed(2)}</div>
+                      <Badge variant={company.changePct >= 0 ? "default" : "destructive"} className="text-xs">
+                        {company.changePct >= 0 ? '+' : ''}{company.changePct.toFixed(2)}% today
                       </Badge>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-3">
                       <div className="text-sm text-muted-foreground">Market Cap</div>
-                      <div className="text-lg font-semibold">{formatMarketCap(company.market_cap)}</div>
+                      <div className="text-lg font-semibold">{formatMarketCap(company.marketCap)}</div>
                       <Badge variant="secondary" className="text-xs">{company.sector}</Badge>
                     </CardContent>
                   </Card>
@@ -147,23 +142,23 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/E Ratio</span>
-                  <span className="font-medium">{formatNumber(company.pe_ratio, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.pe, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Forward P/E</span>
-                  <span className="font-medium">N/A</span>
+                  <span className="font-medium">{formatNumber(company.forwardPE, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/B Ratio</span>
-                  <span className="font-medium">{formatNumber(company.pb_ratio, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.pb, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">P/S Ratio</span>
-                  <span className="font-medium">{formatNumber(company.ps_ratio, 1)}</span>
+                  <span className="font-medium">{formatNumber(company.ps, 1)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">EV/EBITDA</span>
-                  <span className="font-medium">N/A</span>
+                  <span className="font-medium">{formatNumber(company.evEbitda, 1)}</span>
                 </div>
               </div>
             </div>
@@ -174,19 +169,19 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <div className="space-y-3">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">ROE</span>
-                  <span className="font-medium">{formatPercent(company.roe)}</span>
+                  <span className="font-medium">{formatPercent(company.roeTTM)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">ROA</span>
-                  <span className="font-medium">{formatPercent(company.roa)}</span>
+                  <span className="font-medium">{formatPercent(company.roaTTM)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Net Margin</span>
-                  <span className="font-medium">{formatPercent(company.net_margin)}</span>
+                  <span className="font-medium">{formatPercent(company.netMarginTTM)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Revenue Growth</span>
-                  <span className="font-medium">{formatPercent(company.revenue_growth_ttm)}</span>
+                  <span className="font-medium">{formatPercent(company.revenueGrowthTTM)}</span>
                 </div>
               </div>
             </div>
@@ -204,20 +199,20 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Dividend Yield</span>
-                  <span className="font-medium">{formatPercent(company.dividend_yield)}</span>
+                  <span className="font-medium">{formatPercent(company.dividendYield)}</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">52-Week Position</span>
                   <div className="text-right">
                     <span className="font-medium">
-                      {week52Position ? `${(week52Position * 100).toFixed(0)}%` : 'N/A'}
+                      {company.week52Position ? `${(company.week52Position * 100).toFixed(0)}%` : 'N/A'}
                     </span>
-                    {week52Position && (
-                      <div className={`text-xs ${get52WeekColor(week52Position)}`}>
-                        {week52Position >= 0.8 ? 'Near High' :
-                         week52Position >= 0.6 ? 'Above Mid' :
-                         week52Position >= 0.4 ? 'Mid Range' :
-                         week52Position >= 0.2 ? 'Below Mid' : 'Near Low'}
+                    {company.week52Position && (
+                      <div className={`text-xs ${get52WeekColor(company.week52Position)}`}>
+                        {company.week52Position >= 0.8 ? 'Near High' :
+                         company.week52Position >= 0.6 ? 'Above Mid' :
+                         company.week52Position >= 0.4 ? 'Mid Range' :
+                         company.week52Position >= 0.2 ? 'Below Mid' : 'Near Low'}
                       </div>
                     )}
                   </div>
@@ -226,29 +221,29 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
             </div>
 
             {/* 52-Week Range Visual */}
-            {company.week52_high && company.week52_low && (
+            {company.week52High && company.week52Low && (
               <div className="mb-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-3">52-Week Range</h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>${company.week52_low.toFixed(2)}</span>
-                    <span>${company.week52_high.toFixed(2)}</span>
+                    <span>${company.week52Low.toFixed(2)}</span>
+                    <span>${company.week52High.toFixed(2)}</span>
                   </div>
                   <div className="relative h-2 bg-gray-200 rounded-full">
                     <div 
                       className="absolute h-2 bg-gradient-to-r from-red-400 to-green-400 rounded-full"
                       style={{ width: '100%' }}
                     />
-                    {week52Position && (
+                    {company.week52Position && (
                       <div 
                         className="absolute w-3 h-3 bg-blue-600 rounded-full transform -translate-x-1/2 -translate-y-0.5 border-2 border-white shadow"
-                        style={{ left: `${week52Position * 100}%`, top: '50%' }}
+                        style={{ left: `${company.week52Position * 100}%`, top: '50%' }}
                       />
                     )}
                   </div>
                   <div className="text-center mt-2">
                     <span className="text-sm font-medium text-gray-900">
-                      Current: ${company.current_price.toFixed(2)}
+                      Current: ${company.price.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -272,7 +267,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
                   <span className="text-sm text-gray-600">Avg Volume</span>
                   <span className="font-medium">
-                    {company.avg_volume ? (company.avg_volume / 1e6).toFixed(1) + 'M' : 'N/A'}
+                    {company.avgVolume ? (company.avgVolume / 1e6).toFixed(1) + 'M' : 'N/A'}
                   </span>
                 </div>
               </div>
@@ -283,7 +278,7 @@ export default function CompanyDetailDrawer({ company, isOpen, onClose }: Compan
               <h3 className="text-lg font-medium text-gray-900 mb-3">Price Trend (30D)</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <DetailSparkline 
-                  data={[]}
+                  data={company.sparkline || []}
                   height={120}
                   showGrid={true}
                   showTooltip={true}

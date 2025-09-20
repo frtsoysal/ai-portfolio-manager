@@ -41,6 +41,7 @@ export default function DCFAnalysisPage() {
   // Load data on mount
   useEffect(() => {
     if (symbol) {
+      console.log('Starting to fetch DCF data for:', symbol)
       fetchDCFData(symbol.toUpperCase())
     }
   }, [symbol])
@@ -50,8 +51,8 @@ export default function DCFAnalysisPage() {
       setLoading(true)
       setError('')
 
-      // Fetch DCF data from our proxy endpoint
-      const response = await fetch(`/api/backend/dcf/${ticker}`)
+      // Fetch DCF data from our API endpoint
+      const response = await fetch(`/api/fmp/dcf-data?symbol=${ticker}`)
       if (!response.ok) {
         throw new Error(`Failed to fetch data for ${ticker}`)
       }
@@ -81,6 +82,17 @@ export default function DCFAnalysisPage() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Loading DCF analysis for {symbol?.toUpperCase()}...</p>
+            <p className="text-sm text-gray-400 mt-2">Debug: useEffect should trigger soon...</p>
+            <p className="text-xs text-red-400">Symbol: {JSON.stringify(symbol)} | Params: {JSON.stringify(params)}</p>
+            <button 
+              onClick={() => {
+                console.log('Manual fetch triggered')
+                fetchDCFData(symbol.toUpperCase())
+              }}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+            >
+              Manual Fetch
+            </button>
           </div>
         </div>
       </div>
@@ -182,37 +194,37 @@ export default function DCFAnalysisPage() {
             {/* Valuation Summary */}
             <ValuationCard 
               valuation={dcfModel?.valuation}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Forecast Charts */}
             <ForecastCharts 
               projections={dcfModel?.projections || []}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Forecast Table */}
             <ForecastTable 
               projections={dcfModel?.projections || []}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Terminal Value Analysis */}
             <TerminalValueCard 
               model={dcfModel}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Valuation Bridge */}
             <ValuationBridge 
               model={dcfModel}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Multiples Analysis */}
             <MultiplesAnalysis 
               model={dcfModel}
-              currency={dcfData.market?.currency || 'USD'}
+              currency={dcfData.market.currency}
             />
 
             {/* Analysis Tabs */}

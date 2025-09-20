@@ -163,47 +163,47 @@ export default function CompareDrawer() {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{company.symbol}</div>
-                              <div className="text-sm text-gray-500 truncate max-w-48">{company.company_name}</div>
+                              <div className="text-sm text-gray-500 truncate max-w-48">{company.name}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="text-sm font-medium text-gray-900">${company.current_price.toFixed(2)}</div>
-                          <div className={`text-xs ${company.day_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {company.day_change_percent >= 0 ? '+' : ''}{company.day_change_percent.toFixed(2)}%
+                          <div className="text-sm font-medium text-gray-900">${company.price.toFixed(2)}</div>
+                          <div className={`text-xs ${company.changePct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {company.changePct >= 0 ? '+' : ''}{company.changePct.toFixed(2)}%
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className="text-sm font-medium text-gray-900">{formatMarketCap(company.market_cap)}</div>
+                          <div className="text-sm font-medium text-gray-900">{formatMarketCap(company.marketCap)}</div>
                           <div className="text-xs text-gray-500">{company.sector}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getPEColorClass(company.pe_ratio)}`}>
-                            {formatNumber(company.pe_ratio, 1)}
+                          <div className={`text-sm font-medium ${getPEColorClass(company.pe)}`}>
+                            {formatNumber(company.pe, 1)}
                           </div>
                           <div className="text-xs text-gray-500">
-                            Fwd: N/A
+                            Fwd: {formatNumber(company.forwardPE, 1)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.dividend_yield)}`}>
-                            {formatPercent(company.dividend_yield)}
+                          <div className={`text-sm font-medium ${getColorClass(company.dividendYield)}`}>
+                            {formatPercent(company.dividendYield)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.roe)}`}>
-                            {formatPercent(company.roe)}
+                          <div className={`text-sm font-medium ${getColorClass(company.roeTTM)}`}>
+                            {formatPercent(company.roeTTM)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <div className={`text-sm font-medium ${getColorClass(company.net_margin)}`}>
-                            {formatPercent(company.net_margin)}
+                          <div className={`text-sm font-medium ${getColorClass(company.netMarginTTM)}`}>
+                            {formatPercent(company.netMarginTTM)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex justify-center">
                             <Sparkline
-                              data={[]}
+                              data={company.sparkline || []}
                               width={80}
                               height={40}
                               color="auto"

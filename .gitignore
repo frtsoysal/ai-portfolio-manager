@@ -49,6 +49,17 @@ build/
 !tsconfig*.json
 !components.json
 
+# CSV files and temporary data
+*.csv
+*.pkg
+*.tgz
+
+# Test and exploration scripts (keep local)
+backend/test_*.py
+backend/explore_*.py
+backend/get_*.py
+backend/format_*.py
+
 
 
 

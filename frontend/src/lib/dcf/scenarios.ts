@@ -262,7 +262,7 @@ export const runMonteCarloSimulation = (
         randomValue = min + Math.random() * (max - min)
       }
 
-      (scenarioInputs as any)[param.name] = randomValue
+      scenarioInputs[param.name] = randomValue
     })
 
     try {
@@ -286,7 +286,7 @@ export const runMonteCarloSimulation = (
   const p75 = sortedResults[Math.floor(sortedResults.length * 0.75)]
   const p90 = sortedResults[Math.floor(sortedResults.length * 0.9)]
 
-  const currentPrice = dcfData.market?.currentPrice || 0
+  const currentPrice = dcfData.market.currentPrice
   const above0 = results.filter(r => r > currentPrice).length / results.length
   const above10 = results.filter(r => r > currentPrice * 1.1).length / results.length
   const above20 = results.filter(r => r > currentPrice * 1.2).length / results.length

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ScreenerRow } from '../types/screener'
+import { ScreenerRow } from '../app/api/screener/route'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'

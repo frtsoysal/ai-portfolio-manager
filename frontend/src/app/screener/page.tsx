@@ -1,53 +1,157 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { ScreenerRow } from '../../types/screener'
-import FilterPanel, { initialFilters } from '../../components/FilterPanel'
-import DataTable from '../../components/DataTable'
-import CompanyDetailDrawer from '../../components/CompanyDetailDrawer'
-import { CompareProvider } from '../../components/CompareContext'
-import CompareDrawer from '../../components/CompareDrawer'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useState, useEffect, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card'
+import { Input } from '../../components/ui/input'
+import { Button } from '../../components/ui/button'
+import { Badge } from '../../components/ui/badge'
+
+interface ScreenerRow {
+  symbol: string
+  name: string
+  sector: string
+  industry: string
+  price: number
+  changePct: number
+  marketCap: number
+  pe?: number
+  ps?: number
+  pb?: number
+  dividendYield?: number
+  beta?: number
+  week52Position?: number
+  revenueGrowthTTM?: number
+  netMarginTTM?: number
+  roeTTM?: number
+  roaTTM?: number
+  avgVolume?: number
+  week52High?: number
+  week52Low?: number
+  ev?: number
+  ebitda?: number
+  sparkline?: number[]
+}
+
+interface Filters {
+  search: string
+  sector: string
+  industry: string
+  country: string
+  exchange: string
+  minMarketCap: number
+  maxMarketCap: number
+  minPrice: number
+  maxPrice: number
+  minVolume: number
+  maxVolume: number
+  minBeta: number
+  maxBeta: number
+  minDividendYield: number
+  maxDividendYield: number
+  maxPE: number
+  isEtf: boolean
+  isFund: boolean
+  isActivelyTrading: boolean
+  profitable: boolean
+}
 
 export default function ScreenerPage() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const isUpdatingURL = useRef(false)
-  
   const [data, setData] = useState<ScreenerRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState<string>('')
   const [error, setError] = useState<string>('')
-  const [filters, setFilters] = useState(initialFilters)
-  const [filterPanelOpen, setFilterPanelOpen] = useState(false)
-  const [selectedCompany, setSelectedCompany] = useState<ScreenerRow | null>(null)
+  const [lastUpdate, setLastUpdate] = useState<string>('')
+  
+  const [filters, setFilters] = useState<Filters>({
+    search: '',
+    sector: '',
+    industry: '',
+    country: 'US',
+    exchange: '',
+    minMarketCap: 0,
+    maxMarketCap: 0,
+    minPrice: 0,
+    maxPrice: 0,
+    minVolume: 0,
+    maxVolume: 0,
+    minBeta: 0,
+    maxBeta: 0,
+    minDividendYield: 0,
+    maxDividendYield: 0,
+    maxPE: 0,
+    isEtf: false,
+    isFund: false,
+    isActivelyTrading: true,
+    profitable: false
+  })
+
+  const [sortBy, setSortBy] = useState<keyof ScreenerRow>('marketCap')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   useEffect(() => {
     fetchData()
   }, [])
 
+  // Refetch data when filters change (with debounce)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchData()
+    }, 1000) // 1 second debounce
+
+    return () => clearTimeout(timeoutId)
+  }, [filters])
+
   const fetchData = async (refresh = false) => {
     try {
       setLoading(true)
-      const url = `/api/backend/screener${refresh ? '?refresh=1' : ''}`
+      setError('')
+      
+      // Build query parameters from filters
+      const queryParams = new URLSearchParams()
+      if (refresh) queryParams.append('refresh', '1')
+      
+      // Add all filter parameters
+      if (filters.sector) queryParams.append('sector', filters.sector)
+      if (filters.industry) queryParams.append('industry', filters.industry)
+      if (filters.country) queryParams.append('country', filters.country)
+      if (filters.exchange) queryParams.append('exchange', filters.exchange)
+      if (filters.minMarketCap > 0) queryParams.append('marketCapMoreThan', (filters.minMarketCap * 1e9).toString())
+      if (filters.maxMarketCap > 0) queryParams.append('marketCapLowerThan', (filters.maxMarketCap * 1e9).toString())
+      if (filters.minPrice > 0) queryParams.append('priceMoreThan', filters.minPrice.toString())
+      if (filters.maxPrice > 0) queryParams.append('priceLowerThan', filters.maxPrice.toString())
+      if (filters.minVolume > 0) queryParams.append('volumeMoreThan', filters.minVolume.toString())
+      if (filters.maxVolume > 0) queryParams.append('volumeLowerThan', filters.maxVolume.toString())
+      if (filters.minBeta > 0) queryParams.append('betaMoreThan', filters.minBeta.toString())
+      if (filters.maxBeta > 0) queryParams.append('betaLowerThan', filters.maxBeta.toString())
+      // Note: Dividend filtering is done client-side since FMP uses absolute dividend amounts, not yield percentages
+      queryParams.append('isEtf', filters.isEtf.toString())
+      queryParams.append('isFund', filters.isFund.toString())
+      queryParams.append('isActivelyTrading', filters.isActivelyTrading.toString())
+      
+      const url = `/api/screener?${queryParams.toString()}`
       const response = await fetch(url)
       
       if (!response.ok) {
-        throw new Error('Failed to fetch data')
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
       const result = await response.json()
-      setData(result.data)
-      setLastUpdate(result.lastUpdate)
-      setError('')
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+
+      setData(result.data || [])
+      setLastUpdate(result.lastUpdate || new Date().toISOString())
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      console.error('Fetch error:', err)
+      setError(err instanceof Error ? err.message : 'Veri yüklenirken hata oluştu')
     } finally {
       setLoading(false)
     }
   }
 
+  // Format functions
   const formatMarketCap = (value: number) => {
     if (value >= 1e12) return `$${(value / 1e12).toFixed(1)}T`
     if (value >= 1e9) return `$${(value / 1e9).toFixed(1)}B`
@@ -56,136 +160,109 @@ export default function ScreenerPage() {
   }
 
   const formatPercent = (value: number | undefined) => {
-    if (value === undefined) return 'N/A'
+    if (value === undefined || value === null) return 'N/A'
     return `${(value * 100).toFixed(2)}%`
   }
 
-  // Filter data based on current filters
-  const filteredData = useMemo(() => {
-    return data.filter(company => {
+  const formatNumber = (value: number | undefined, decimals = 2) => {
+    if (value === undefined || value === null) return 'N/A'
+    return value.toFixed(decimals)
+  }
+
+  // Get unique sectors for filter
+  const sectors = useMemo(() => {
+    const uniqueSectors = [...new Set(data.map(item => item.sector))].filter(Boolean)
+    return uniqueSectors.sort()
+  }, [data])
+
+  // Filter and sort data
+  const filteredAndSortedData = useMemo(() => {
+    let filtered = data.filter(item => {
       // Search filter
       if (filters.search) {
         const searchTerm = filters.search.toLowerCase()
-        if (!company.symbol.toLowerCase().includes(searchTerm) && 
-            !company.company_name.toLowerCase().includes(searchTerm)) {
+        if (!item.symbol.toLowerCase().includes(searchTerm) && 
+            !item.name.toLowerCase().includes(searchTerm)) {
           return false
         }
       }
 
       // Sector filter
-      if (filters.sectors.length > 0 && !filters.sectors.includes(company.sector)) {
+      if (filters.sector && item.sector !== filters.sector) {
         return false
       }
 
-      // Price range
-      if (filters.priceMin !== null && company.current_price < filters.priceMin) return false
-      if (filters.priceMax !== null && company.current_price > filters.priceMax) return false
+      // Market cap filter
+      if (filters.minMarketCap > 0 && item.marketCap < filters.minMarketCap * 1e9) {
+        return false
+      }
 
-      // Market cap range
-      if (filters.marketCapMin !== null && company.market_cap < filters.marketCapMin) return false
-      if (filters.marketCapMax !== null && company.market_cap > filters.marketCapMax) return false
+      // P/E filter
+      if (filters.maxPE < 100 && item.pe && item.pe > filters.maxPE) {
+        return false
+      }
 
-      // P/E range
-      if (filters.peMin !== null && (company.pe_ratio === undefined || company.pe_ratio < filters.peMin)) return false
-      if (filters.peMax !== null && (company.pe_ratio === undefined || company.pe_ratio > filters.peMax)) return false
+      // Dividend yield filters (client-side since FMP uses absolute amounts)
+      if (filters.minDividendYield > 0 && (!item.dividendYield || item.dividendYield < filters.minDividendYield / 100)) {
+        return false
+      }
+      
+      if (filters.maxDividendYield > 0 && item.dividendYield && item.dividendYield > filters.maxDividendYield / 100) {
+        return false
+      }
 
-      // Beta range
-      if (filters.betaMin !== null && (company.beta === undefined || company.beta < filters.betaMin)) return false
-      if (filters.betaMax !== null && (company.beta === undefined || company.beta > filters.betaMax)) return false
-
-      // Boolean filters
-      if (filters.profitable && (company.net_margin === undefined || company.net_margin <= 0)) return false
-      if (filters.dividendPayers && (company.dividend_yield === undefined || company.dividend_yield <= 0)) return false
-      if (filters.lowVolatility && (company.beta === undefined || company.beta >= 1)) return false
+      // Profitable filter
+      if (filters.profitable && (!item.netMarginTTM || item.netMarginTTM <= 0)) {
+        return false
+      }
 
       return true
     })
-  }, [data, filters])
 
-  const displayData = filteredData
+    // Sort data
+    filtered.sort((a, b) => {
+      const aVal = a[sortBy]
+      const bVal = b[sortBy]
+      
+      if (aVal === undefined || aVal === null) return 1
+      if (bVal === undefined || bVal === null) return -1
+      
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortOrder === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+      }
+      
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortOrder === 'asc' ? aVal - bVal : bVal - aVal
+      }
+      
+      return 0
+    })
 
-  // Serialize filters to URL parameters
-  const serializeFilters = (filters: typeof initialFilters) => {
-    const params = new URLSearchParams()
-    
-    if (filters.search) params.set('search', filters.search)
-    if (filters.sectors.length) params.set('sectors', filters.sectors.join(','))
-    if (filters.industries.length) params.set('industries', filters.industries.join(','))
-    if (filters.priceMin !== null) params.set('priceMin', filters.priceMin.toString())
-    if (filters.priceMax !== null) params.set('priceMax', filters.priceMax.toString())
-    if (filters.marketCapMin !== null) params.set('mcMin', filters.marketCapMin.toString())
-    if (filters.marketCapMax !== null) params.set('mcMax', filters.marketCapMax.toString())
-    if (filters.peMin !== null) params.set('peMin', filters.peMin.toString())
-    if (filters.peMax !== null) params.set('peMax', filters.peMax.toString())
-    if (filters.dividendYieldMin !== null) params.set('divMin', filters.dividendYieldMin.toString())
-    if (filters.dividendYieldMax !== null) params.set('divMax', filters.dividendYieldMax.toString())
-    if (filters.betaMin !== null) params.set('betaMin', filters.betaMin.toString())
-    if (filters.betaMax !== null) params.set('betaMax', filters.betaMax.toString())
-    if (filters.revenueGrowthMin !== null) params.set('revGMin', filters.revenueGrowthMin.toString())
-    if (filters.profitable) params.set('profitable', 'true')
-    if (filters.dividendPayers) params.set('divPayers', 'true')
-    if (filters.lowVolatility) params.set('lowVol', 'true')
-    
-    return params.toString()
+    return filtered
+  }, [data, filters, sortBy, sortOrder])
+
+  const handleSort = (column: keyof ScreenerRow) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(column)
+      setSortOrder('desc')
+    }
   }
 
-  // Deserialize URL parameters to filters
-  const deserializeFilters = (params: URLSearchParams) => {
-    const filters = { ...initialFilters }
-    
-    if (params.get('search')) filters.search = params.get('search') || ''
-    if (params.get('sectors')) filters.sectors = params.get('sectors')?.split(',') || []
-    if (params.get('industries')) filters.industries = params.get('industries')?.split(',') || []
-    if (params.get('priceMin')) filters.priceMin = parseFloat(params.get('priceMin') || '0')
-    if (params.get('priceMax')) filters.priceMax = parseFloat(params.get('priceMax') || '0')
-    if (params.get('mcMin')) filters.marketCapMin = parseFloat(params.get('mcMin') || '0')
-    if (params.get('mcMax')) filters.marketCapMax = parseFloat(params.get('mcMax') || '0')
-    if (params.get('peMin')) filters.peMin = parseFloat(params.get('peMin') || '0')
-    if (params.get('peMax')) filters.peMax = parseFloat(params.get('peMax') || '0')
-    if (params.get('divMin')) filters.dividendYieldMin = parseFloat(params.get('divMin') || '0')
-    if (params.get('divMax')) filters.dividendYieldMax = parseFloat(params.get('divMax') || '0')
-    if (params.get('betaMin')) filters.betaMin = parseFloat(params.get('betaMin') || '0')
-    if (params.get('betaMax')) filters.betaMax = parseFloat(params.get('betaMax') || '0')
-    if (params.get('revGMin')) filters.revenueGrowthMin = parseFloat(params.get('revGMin') || '0')
-    if (params.get('profitable') === 'true') filters.profitable = true
-    if (params.get('divPayers') === 'true') filters.dividendPayers = true
-    if (params.get('lowVol') === 'true') filters.lowVolatility = true
-    
-    return filters
+  const getSortIcon = (column: keyof ScreenerRow) => {
+    if (sortBy !== column) return '↕️'
+    return sortOrder === 'asc' ? '↑' : '↓'
   }
-
-  // Update URL when filters change
-  useEffect(() => {
-    if (isUpdatingURL.current) {
-      isUpdatingURL.current = false
-      return
-    }
-    
-    const queryString = serializeFilters(filters)
-    const newUrl = queryString ? `${pathname}?${queryString}` : pathname
-    
-    // Only update if URL has actually changed
-    if (window.location.search !== (queryString ? `?${queryString}` : '')) {
-      router.replace(newUrl, { scroll: false })
-    }
-  }, [filters, pathname, router])
-
-  // Initialize filters from URL on page load
-  useEffect(() => {
-    if (searchParams?.toString()) {
-      isUpdatingURL.current = true
-      const urlFilters = deserializeFilters(searchParams)
-      setFilters(urlFilters)
-    }
-  }, [searchParams])
 
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
-            <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-gray-200 rounded w-64"></div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="h-24 bg-gray-200 rounded"></div>
               ))}
@@ -199,153 +276,459 @@ export default function ScreenerPage() {
 
   if (error) {
     return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">Error: {error}</div>
-          <button 
-            onClick={() => fetchData()}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">Hata</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-gray-600">{error}</p>
+            <Button onClick={() => fetchData()} className="w-full">
+              Tekrar Dene
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
   return (
-    <CompareProvider>
-      <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gray-50">
         {/* Header */}
-        <header className="bg-white shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-6 py-6">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setFilterPanelOpen(true)}
-                  className="lg:hidden bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-                >
-                  <span>🔍</span>
-                  Filters
-                </button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">S&P 500 Screener</h1>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Last updated: {new Date(lastUpdate).toLocaleString()}
+              <h1 className="text-3xl font-bold text-gray-900">S&P 500 Screener</h1>
+              <p className="text-gray-600 mt-1">
+                Son güncelleme: {new Date(lastUpdate).toLocaleString('tr-TR')}
                   </p>
                 </div>
-              </div>
-              <button
+            <Button 
                 onClick={() => fetchData(true)}
                 disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <span className="text-lg">🔄</span>
-                Refresh
-              </button>
-            </div>
+              variant="outline"
+            >
+              🔄 Yenile
+            </Button>
           </div>
-        </header>
+        </div>
+      </div>
 
-      <div className="flex h-screen">
-        {/* Filter Panel */}
-        <FilterPanel
-          data={data}
-          filters={filters}
-          onFiltersChange={setFilters}
-          isOpen={filterPanelOpen}
-          onClose={() => setFilterPanelOpen(false)}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 overflow-auto">
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* KPI Strip */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
+      <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <span className="text-blue-600 text-xl">📊</span>
               </div>
               <div className="ml-4">
-                <p className="text-2xl font-bold text-gray-900">{displayData.length}</p>
-                <p className="text-sm text-gray-600">Companies</p>
+                  <p className="text-2xl font-bold text-gray-900">{filteredAndSortedData.length}</p>
+                  <p className="text-sm text-gray-600">Şirket</p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
                 <span className="text-green-600 text-xl">💰</span>
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {displayData.length > 0 ? 
-                    (displayData.filter(d => d.pe_ratio).reduce((a, b, _, arr) => a + (b.pe_ratio || 0), 0) / displayData.filter(d => d.pe_ratio).length || 0).toFixed(1) : '0'
+                    {filteredAndSortedData.length > 0 ? 
+                      (filteredAndSortedData
+                        .filter(d => d.pe && d.pe > 0 && d.pe < 100)
+                        .reduce((sum, d) => sum + (d.pe || 0), 0) / 
+                       filteredAndSortedData.filter(d => d.pe && d.pe > 0 && d.pe < 100).length || 0
+                      ).toFixed(1) : '0'
                   }
                 </p>
-                <p className="text-sm text-gray-600">Avg P/E</p>
+                  <p className="text-sm text-gray-600">Ort. P/E</p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <span className="text-purple-600 text-xl">📈</span>
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatMarketCap(displayData.reduce((sum, company) => sum + company.market_cap, 0))}
+                    {formatMarketCap(filteredAndSortedData.reduce((sum, d) => sum + d.marketCap, 0))}
                 </p>
-                <p className="text-sm text-gray-600">Total Market Cap</p>
+                  <p className="text-sm text-gray-600">Toplam Piyasa Değeri</p>
+                </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-sm p-6 border">
+          <Card>
+            <CardContent className="p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <span className="text-yellow-600 text-xl">⚡</span>
+                  <span className="text-yellow-600 text-xl">💎</span>
               </div>
               <div className="ml-4">
                 <p className="text-2xl font-bold text-gray-900">
-                  {displayData.filter(d => d.dividend_yield && d.dividend_yield > 0).length}
-                </p>
-                <p className="text-sm text-gray-600">Dividend Payers</p>
+                    {filteredAndSortedData.filter(d => d.dividendYield && d.dividendYield > 0).length}
+                  </p>
+                  <p className="text-sm text-gray-600">Temettü Veren</p>
+                </div>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Advanced Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Gelişmiş Filtreler</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {/* Basic Filters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3">Temel Filtreler</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Arama</label>
+                    <Input
+                      placeholder="Sembol veya şirket adı"
+                      value={filters.search}
+                      onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ülke</label>
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={filters.country}
+                      onChange={(e) => setFilters(prev => ({ ...prev, country: e.target.value }))}
+                    >
+                      <option value="US">Amerika (US)</option>
+                      <option value="CA">Kanada (CA)</option>
+                      <option value="GB">İngiltere (GB)</option>
+                      <option value="DE">Almanya (DE)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Borsa</label>
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={filters.exchange}
+                      onChange={(e) => setFilters(prev => ({ ...prev, exchange: e.target.value }))}
+                    >
+                      <option value="">Tüm Borsalar</option>
+                      <option value="NYSE">NYSE</option>
+                      <option value="NASDAQ">NASDAQ</option>
+                      <option value="AMEX">AMEX</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-end space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={filters.isActivelyTrading}
+                        onChange={(e) => setFilters(prev => ({ ...prev, isActivelyTrading: e.target.checked }))}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">Aktif İşlem</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Price & Market Cap Filters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3">Fiyat & Piyasa Değeri</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Fiyat ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={filters.minPrice || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minPrice: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Fiyat ($)</label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="Sınırsız"
+                      value={filters.maxPrice || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Piyasa Değeri (B$)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="0"
+                      value={filters.minMarketCap || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minMarketCap: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Piyasa Değeri (B$)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Sınırsız"
+                      value={filters.maxMarketCap || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxMarketCap: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Volume & Beta Filters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3">Hacim & Beta</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Hacim</label>
+                    <Input
+                      type="number"
+                      placeholder="0"
+                      value={filters.minVolume || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minVolume: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Hacim</label>
+                    <Input
+                      type="number"
+                      placeholder="Sınırsız"
+                      value={filters.maxVolume || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxVolume: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Beta</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="0"
+                      value={filters.minBeta || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minBeta: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Beta</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Sınırsız"
+                      value={filters.maxBeta || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxBeta: Number(e.target.value) || 0 }))}
+                    />
             </div>
           </div>
         </div>
 
-        {/* Advanced DataTable */}
-        <DataTable 
-          data={displayData} 
-          onRowClick={setSelectedCompany}
-        />
+              {/* Dividend Filters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3">Temettü</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Min Temettü Verimi (%)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="0"
+                      value={filters.minDividendYield || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, minDividendYield: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
 
-        {/* Footer */}
-        <footer className="mt-12 py-6 border-t border-gray-200">
-          <p className="text-center text-sm text-gray-500">
-            Data via FMP API • For research purposes only • Not investment advice
-          </p>
-        </footer>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Max Temettü Verimi (%)</label>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      placeholder="Sınırsız"
+                      value={filters.maxDividendYield || ''}
+                      onChange={(e) => setFilters(prev => ({ ...prev, maxDividendYield: Number(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div className="flex items-end space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={filters.profitable}
+                        onChange={(e) => setFilters(prev => ({ ...prev, profitable: e.target.checked }))}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">Sadece Karlı</span>
+                    </label>
+                  </div>
+
+                  <div className="flex items-end space-x-4">
+                    <Button 
+                      onClick={() => setFilters({
+                        search: '',
+                        sector: '',
+                        industry: '',
+                        country: 'US',
+                        exchange: '',
+                        minMarketCap: 0,
+                        maxMarketCap: 0,
+                        minPrice: 0,
+                        maxPrice: 0,
+                        minVolume: 0,
+                        maxVolume: 0,
+                        minBeta: 0,
+                        maxBeta: 0,
+                        minDividendYield: 0,
+                        maxDividendYield: 0,
+                        maxPE: 0,
+                        isEtf: false,
+                        isFund: false,
+                        isActivelyTrading: true,
+                        profitable: false
+                      })}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      🔄 Filtreleri Sıfırla
+                    </Button>
         </div>
       </div>
       </div>
 
-      {/* Company Detail Drawer */}
-      <CompanyDetailDrawer
-        company={selectedCompany}
-        isOpen={!!selectedCompany}
-        onClose={() => setSelectedCompany(null)}
-      />
-      
-      {/* Compare Drawer */}
-      <CompareDrawer />
+              {/* Fund Type Filters */}
+              <div>
+                <h3 className="text-lg font-medium mb-3">Fon Türleri</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.isEtf}
+                      onChange={(e) => setFilters(prev => ({ ...prev, isEtf: e.target.checked }))}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">ETF'leri Dahil Et</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.isFund}
+                      onChange={(e) => setFilters(prev => ({ ...prev, isFund: e.target.checked }))}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Yatırım Fonlarını Dahil Et</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Data Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Şirketler ({filteredAndSortedData.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('symbol')}>
+                      Sembol {getSortIcon('symbol')}
+                    </th>
+                    <th className="text-left p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('name')}>
+                      Şirket {getSortIcon('name')}
+                    </th>
+                    <th className="text-left p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('sector')}>
+                      Sektör {getSortIcon('sector')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('price')}>
+                      Fiyat {getSortIcon('price')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('changePct')}>
+                      Daily Change {getSortIcon('changePct')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('marketCap')}>
+                      Piyasa Değeri {getSortIcon('marketCap')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('pe')}>
+                      P/E {getSortIcon('pe')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('dividendYield')}>
+                      Temettü {getSortIcon('dividendYield')}
+                    </th>
+                    <th className="text-right p-2 cursor-pointer hover:bg-gray-50" onClick={() => handleSort('beta')}>
+                      Beta {getSortIcon('beta')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAndSortedData.map((row, index) => (
+                    <tr key={row.symbol} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                      <td className="p-2">
+                        <div className="font-medium text-blue-600">{row.symbol}</div>
+                      </td>
+                      <td className="p-2">
+                        <div className="font-medium">{row.name}</div>
+                        <div className="text-xs text-gray-500">{row.industry}</div>
+                      </td>
+                      <td className="p-2">
+                        <Badge variant="outline" className="text-xs">
+                          {row.sector}
+                        </Badge>
+                      </td>
+                      <td className="p-2 text-right font-medium">
+                        ${row.price.toFixed(2)}
+                      </td>
+                      <td className="p-2 text-right">
+                        <span className={`font-medium ${row.changePct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {row.changePct >= 0 ? '+' : ''}{row.changePct.toFixed(2)}%
+                        </span>
+                      </td>
+                      <td className="p-2 text-right font-medium">
+                        {formatMarketCap(row.marketCap)}
+                      </td>
+                      <td className="p-2 text-right">
+                        {formatNumber(row.pe)}
+                      </td>
+                      <td className="p-2 text-right">
+                        {formatPercent(row.dividendYield)}
+                      </td>
+                      <td className="p-2 text-right">
+                        {formatNumber(row.beta)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </CompareProvider>
+    </div>
   )
 }

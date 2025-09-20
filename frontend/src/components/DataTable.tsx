@@ -13,7 +13,7 @@ import {
   VisibilityState,
 } from '@tanstack/react-table'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { ScreenerRow } from '../types/screener'
+import { ScreenerRow } from '../app/api/screener/route'
 import Sparkline from './Sparkline'
 import ExportButton from './ExportButton'
 import CopyLinkButton from './CopyLinkButton'
@@ -55,7 +55,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       cell: info => (
         <div>
           <div className="font-medium text-gray-900">{info.getValue()}</div>
-          <div className="text-sm text-gray-500 truncate max-w-32">{info.row.original.company_name}</div>
+          <div className="text-sm text-gray-500 truncate max-w-32">{info.row.original.name}</div>
         </div>
       ),
       size: 150,
@@ -82,7 +82,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('current_price', {
+    columnHelper.accessor('price', {
       header: 'Price',
       cell: info => (
         <div className="text-right font-medium">${info.getValue().toFixed(2)}</div>
@@ -91,7 +91,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('day_change_percent', {
+    columnHelper.accessor('changePct', {
       header: 'Change %',
       cell: info => {
         const value = info.getValue()
@@ -105,7 +105,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('market_cap', {
+    columnHelper.accessor('marketCap', {
       header: 'Market Cap',
       cell: info => (
         <div className="text-right font-medium text-gray-900">
@@ -116,7 +116,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('pe_ratio', {
+    columnHelper.accessor('pe', {
       header: 'P/E',
       cell: info => (
         <div className="text-right">{formatNumber(info.getValue(), 1)}</div>
@@ -125,9 +125,16 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
+    columnHelper.accessor('forwardPE', {
+      header: 'Fwd P/E',
+      cell: info => (
+        <div className="text-right">{formatNumber(info.getValue(), 1)}</div>
+      ),
+      size: 90,
+      enableSorting: true,
+    }),
 
-
-    columnHelper.accessor('pb_ratio', {
+    columnHelper.accessor('pb', {
       header: 'P/B',
       cell: info => (
         <div className="text-right">{formatNumber(info.getValue(), 1)}</div>
@@ -136,7 +143,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('dividend_yield', {
+    columnHelper.accessor('dividendYield', {
       header: 'Div Yield',
       cell: info => (
         <div className="text-right">{formatPercent(info.getValue())}</div>
@@ -154,14 +161,21 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('week52_high', {
-      header: '52W High',
+    columnHelper.accessor('week52Position', {
+      header: '52W %',
       cell: info => {
         const value = info.getValue()
         if (value === undefined) return <div className="text-right">N/A</div>
+        const percent = value * 100
+        const colorClass = 
+          percent >= 80 ? 'text-green-600' :
+          percent >= 60 ? 'text-blue-600' :
+          percent >= 40 ? 'text-yellow-600' :
+          percent >= 20 ? 'text-orange-600' : 'text-red-600'
+        
         return (
-          <div className="text-right font-medium">
-            ${value.toFixed(2)}
+          <div className={`text-right font-medium ${colorClass}`}>
+            {percent.toFixed(0)}%
           </div>
         )
       },
@@ -169,7 +183,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('roe', {
+    columnHelper.accessor('roeTTM', {
       header: 'ROE',
       cell: info => (
         <div className="text-right">{formatPercent(info.getValue())}</div>
@@ -178,7 +192,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('net_margin', {
+    columnHelper.accessor('netMarginTTM', {
       header: 'Net Margin',
       cell: info => (
         <div className="text-right">{formatPercent(info.getValue())}</div>
@@ -187,7 +201,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       enableSorting: true,
     }),
 
-    columnHelper.accessor('enterprise_value', {
+    columnHelper.accessor('evEbitda', {
       header: 'EV/EBITDA',
       cell: info => (
         <div className="text-right">{formatNumber(info.getValue(), 1)}</div>
@@ -202,7 +216,7 @@ export default function DataTable({ data, onRowClick }: DataTableProps) {
       header: 'Trend',
       cell: (info) => (
         <Sparkline 
-          data={[]} 
+          data={info.row.original.sparkline || []} 
           width={64}
           height={32}
           color="auto"
